@@ -1,12 +1,12 @@
 <?php return array (
   'root' => 
   array (
-    'pretty_version' => '8.x-dev',
-    'version' => '8.9999999.9999999.9999999-dev',
+    'pretty_version' => 'dev-master',
+    'version' => 'dev-master',
     'aliases' => 
     array (
     ),
-    'reference' => 'c1b56831dfb96cfc1e87d40f44f7b2cca07c351c',
+    'reference' => 'cf64814271eb66deab8b6d292aa09ce75de269fd',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -440,12 +440,12 @@
     ),
     'laravel/laravel' => 
     array (
-      'pretty_version' => '8.x-dev',
-      'version' => '8.9999999.9999999.9999999-dev',
+      'pretty_version' => 'dev-master',
+      'version' => 'dev-master',
       'aliases' => 
       array (
       ),
-      'reference' => 'c1b56831dfb96cfc1e87d40f44f7b2cca07c351c',
+      'reference' => 'cf64814271eb66deab8b6d292aa09ce75de269fd',
     ),
     'laravel/sail' => 
     array (
@@ -491,6 +491,15 @@
       array (
       ),
       'reference' => '3b9dff8aaf7323590c1d2e443db701eb1f9aa0d3',
+    ),
+    'leonis/easysms-notification-channel' => 
+    array (
+      'pretty_version' => '1.0.2',
+      'version' => '1.0.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'f2f340526dd6df494fe0748c08802d3d93d2fbd1',
     ),
     'mockery/mockery' => 
     array (
@@ -565,6 +574,15 @@
       array (
       ),
       'reference' => '943b5d70cc5ae7483f6aff6ff43d7e34592ca0f5',
+    ),
+    'overtrue/easy-sms' => 
+    array (
+      'pretty_version' => '1.3.1',
+      'version' => '1.3.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '85040b891b9fcd20954c63889e10e7d26bf49ec9',
     ),
     'phar-io/manifest' => 
     array (
@@ -760,8 +778,8 @@
     array (
       'provided' => 
       array (
-        0 => '1.0',
-        1 => '1.0.0',
+        0 => '1.0.0',
+        1 => '1.0',
       ),
     ),
     'psr/simple-cache' => 

@@ -46,6 +46,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+
+            Route::middleware('wx')
+                ->namespace($this->namespace.'\Wx')
+                ->group(base_path('routes/wx.php'));
         });
     }
 
@@ -60,4 +64,6 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
     }
+
+
 }
