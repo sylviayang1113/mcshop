@@ -10,10 +10,10 @@ use App\Http\Controllers\Controller;
 class WxController extends Controller
 {
 
-    protected function codeReturn(array $codeResponse, $data = null)
+    protected function codeReturn(array $codeResponse, $data = null, $info = '')
     {
         list($errno, $errmsg) = $codeResponse;
-        $ret =  ['errno' => $errno, 'errmsg'=> $errmsg];
+        $ret =  ['errno' => $errno, 'errmsg'=> $info ?: $errmsg];
         if (!is_null($data)) {
             $ret['data'] = $data;
         }
