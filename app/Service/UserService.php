@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 
-class UserService
+class UserService extends BaseService
 {
+
     /**
      * 根据用户名获取用户
      * @param username
@@ -64,6 +65,9 @@ class UserService
     // 验证短信验证码
     public function checkCaptcha(string $mobile, string $code)
     {
+        if (!app()->environment('production')) {
+            return true;
+        }
         $key = 'register_captcha_'.$mobile;
         $isPass =  $code === Cache::get($key);
         if ($isPass)

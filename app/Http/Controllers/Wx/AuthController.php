@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -26,9 +27,9 @@ class AuthController extends Controller
             return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
 
-
         // 验证用户是否存在
-        $user = (new Service())->getByUsername($username);
+        $user = UserService::getInstance()->getByUserName($username);
+        //$user = (new Service())->getByUsername($username);
         if (!is_null($user)) {
             return $this->fail(CodeResponse::AUTH_NAME_REGISTERED);
         }
@@ -43,7 +44,7 @@ class AuthController extends Controller
         }
 
         //  验证验证码是否正确
-        (new UserService())->checkCaptcha($mobile, $code);
+        UserService::getInstance()->checkCaptcha($mobile, $code);
 
         // 写入用户表
         $user = new User();
@@ -82,27 +83,64 @@ class AuthController extends Controller
             return $this->fail(CodeResponse::AUTH_INVALID_MOBILE);
         }
         // 验证手机号是否已经被注册
-        $user = (new Service())->getByMobile($mobile);
+        $user = UserService::getInstance()->getByMobile($mobile);
         if (!is_null($user)) {
             return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);
         }
 
-        // todo 防刷验证, 一分钟内只能请求一次， 当天只能请求一次
+        // 防刷验证, 一分钟内只能请求一次， 当天只能请求一次
         $lock = Cache::add('register_captcha_lock_'.$mobile, 1, 60);
         if (!$lock) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY);
         }
 
-        $isPass = (new UserService())->checkMobileSendCaptchaCount($mobile);
+        $isPass = $this->userService->checkMobileSendCaptchaCount($mobile);
         if (!$isPass) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天发送不能超过10次');
 
         }
 
-        $code = (new UserService())->setCaptcha($mobile);
-        (new UserService())->sendCaptchaMsg($mobile, $code);
+        $code = UserService::getInstance()->setCaptcha($mobile);
+        $this->userService->sendCaptchaMsg($mobile, $code);
         return $this->success();
     }
 
 
+    public function login(Request $request)
+    {
+        // 获取找那个号密码
+        $username = $request->input('username');
+        $password = $request->input('password');
+        // 数据验证
+        if (empty($username) || empty($password)) {
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        }
+        // 验证账号是否存在
+        $user = UserService::getInstance()->getByUsername($username);
+        if (is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
+        }
+        // 对密码进行验证
+        $isPass = Hash::check($password, $user->getAuthPassword());
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT, '账号密码不对');
+        }
+        // 更新登录的信息
+        $user->last_login_time = now()->toDateString();
+        $user->last_login_ip = $request->getClientIp();
+        if (!$user->save()) {
+            return $this->fail(CodeResponse::UPDATED_FAIL);
+        }
+        // 获取token
+        $token = Auth::guard('wx')->login('user');
+        // 组装数据并返回
+        return $this->success( [
+            'token' => '',
+            'userInfo' => [
+                'nickname' => $username,
+                'avatarUrl' => $user->avatar
+            ]
+        ]);
+
+    }
 }
