@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\CodeResponse;
+use App\Exceptions\BusinessException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -67,8 +69,12 @@ class UserService
         if ($isPass)
         {
             Cache::forget($key);
+
+            return true;
+        } else {
+            throw new BusinessException(CodeResponse::AUTH_CAPTCHA_UNMATCH);
         }
-        return $isPass;
+
     }
 
     // 设置手机短信验证码

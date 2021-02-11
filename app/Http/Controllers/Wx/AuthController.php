@@ -43,7 +43,7 @@ class AuthController extends Controller
         }
 
         //  验证验证码是否正确
-        UserService::getInstance()->checkCaptcha($mobile, $code);
+        (new UserService())->checkCaptcha($mobile, $code);
 
         // 写入用户表
         $user = new User();
