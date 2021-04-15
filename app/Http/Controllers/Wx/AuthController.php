@@ -6,6 +6,7 @@ use App\CodeResponse;
 use App\Http\Controllers\Controller;
 use App\Service\UserService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -14,12 +15,94 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    protected $only = ['user'];
-    public function user()
+    protected $only = ['info', 'profile'];
+
+    /**
+     * 获取用户信息
+     * @return JsonResponse
+     */
+    public function info()
     {
-        $user = Auth::guard('wx')->user();
+        $user = $this->user();
+        return $this->success([
+            'nickName' => $user->nickname,
+            'avatar' => $user->gender,
+            'gender' => $user->gender,
+            'mobile' => $user->mobile
+        ]);
 
     }
+
+    /**
+     * 用户信息修改
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function profile (Request $request)
+    {
+        $user = $this->user();
+        $avatar = $request->input('avatar');
+        $gender = $request->input('gender');
+        $nickname = $request->input('nickname');
+
+        if (!empty($avatar)) {
+            $user->avatar = $avatar;
+        }
+        if (!empty($gender)) {
+            $user->gender = $gender;
+        }
+        if (!empty($nickname)) {
+            $user->nickname = $nickname;
+        }
+        $ret = $user->save();
+        return $this->failOrSuccess($ret, CodeResponse::UPDATED_FAIL);
+    }
+
+    /**
+     * 登出接口
+     * @return JsonResponse
+     */
+    public  function logout()
+    {
+        Auth::guard('wx')->logout();
+        return $this->success();
+    }
+
+    /**
+     * 密码重置
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function reset(Request $request)
+    {
+        $password = $request->input('password');
+        $mobile = $request->input('mobile');
+        $code = $request->input('code');
+
+        if (empty($password) || empty($mobile) || empty($code)) {
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        }
+
+        $isPass = UserService::getInstance()->checkCaptcha($mobile, $code);
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH);
+        }
+
+        $user = UserService::getInstance()->getByMobile($mobile);
+        if (is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_MOBILE_UNREGISTERED);
+        }
+
+        $user->password = Hash::make($password);
+        $ret = $user->save();
+        return $this->failOrSuccess($ret, CodeResponse::UPDATED_FAIL);
+    }
+
+    /**
+     * 用户注册
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function register(Request $request)
     {
         // 获取参数
@@ -75,6 +158,11 @@ class AuthController extends Controller
 
     }
 
+    /**
+     * 获取验证码
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function regCaptcha(Request $request)
     {
         // 获取手机号
@@ -112,6 +200,11 @@ class AuthController extends Controller
     }
 
 
+    /**
+     * 用户登陆
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function login(Request $request)
     {
         // 获取找那个号密码
