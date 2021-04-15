@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    protected $only = ['user'];
+    public function user()
+    {
+        $user = Auth::guard('wx')->user();
+
+    }
     public function register(Request $request)
     {
         // 获取参数
