@@ -29,6 +29,11 @@ class WxController extends Controller
         list($errno, $errmsg) = $codeResponse;
         $ret =  ['errno' => $errno, 'errmsg'=> $info ?: $errmsg];
         if (!is_null($data)) {
+            if (is_array($data)) {
+                $data = array_filter($data, function($item) {
+                   return $item !== null;
+                });
+            }
             $ret['data'] = $data;
         }
         return response()->json($ret);

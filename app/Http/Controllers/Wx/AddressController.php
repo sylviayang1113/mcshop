@@ -20,18 +20,6 @@ class AddressController extends WxController
     public function list ()
     {
         $list = AddressService::getInstance()->getAddressListByUserId($this->user()->id);
-        $list = $list->map(function ($address) {
-            $address->toArray();
-            $item = [];
-            foreach ($address as $key => $value) {
-                $key = lcfirst(Str::studly($key));
-                $item[$key] = $value;
-            }
-            return [
-                'id' => $address->id,
-                'areaCode' => $address->area_code
-            ];
-        });
         return $this->success([
             'total' => $list->count(),
             'page' => 1,

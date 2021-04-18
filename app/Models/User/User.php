@@ -1,16 +1,24 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\BaseModel;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Auth\Authenticatable;
 
-class User extends Authenticatable implements JWTSubject
+
+class User extends BaseModel implements
+    AuthenticatableContract,
+    AuthorizableContract,
+    JWTSubject
 {
     use HasFactory, Notifiable;
+    use Authenticatable, Authorizable;
 
     protected $table = 'user';
 

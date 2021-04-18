@@ -1,12 +1,14 @@
 <?php
 
 
-namespace App\Models;
+namespace App\Models\Goods;
 
 
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
-class Category extends Model
+class Category extends BaseModel
 {
 
     protected $table = 'category';

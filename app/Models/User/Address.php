@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
+use App\Models\BaseModel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Address extends Model
+class Address extends BaseModel
 {
     protected $table = 'address';
 

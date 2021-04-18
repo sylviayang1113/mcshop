@@ -22,7 +22,7 @@ class CatalogController extends WxController
             $current = $l1List->where('id', $id)->first();
         }
 
-        $l2List = [];
+        $l2List = null;
         if (is_null($current)) {
             $l2List = CatalogService::getInstance()->getL2ListByPid($current->id);
         }

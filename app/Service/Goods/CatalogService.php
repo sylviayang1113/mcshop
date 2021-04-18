@@ -1,10 +1,10 @@
 <?php
 
 
-namespace App\Service;
+namespace App\Service\Goods;
 
 
-use App\Models\Category;
+use App\Models\Goods\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
