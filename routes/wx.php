@@ -24,7 +24,11 @@ Route::post('auth/profile', 'AuthController@profile'); // 账号修改
 
 
 # 用户模块-地址
-Route::any('auth/list', 'AddressController@list'); // 收货地址
-Route::any('auth/detail', 'AddressController@detail'); // 收货地址详情
-Route::any('auth/save', 'AddressController@save'); // 保存收货地址
-Route::any('auth/delete', 'AddressController@delete'); // 删除收货地址
+Route::any('address/list', 'AddressController@list'); // 收货地址
+Route::any('address/detail', 'AddressController@detail'); // 收货地址详情
+Route::any('address/save', 'AddressController@save'); // 保存收货地址
+Route::any('address/delete', 'AddressController@delete'); // 删除收货地址
+
+// 商品模块-类目
+Route::any('catalog/delete', 'CatalogController@index'); // 分类目录全部分类数据接口
+Route::any('catalog/delete', 'CatalogController@current'); // 分类目录当前分类数据接口
