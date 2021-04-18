@@ -36,6 +36,13 @@ class AddressService extends BaseService
             ->where('deleted', 0)->first();
     }
 
+    /**
+     * 删除用户地址
+     * @param $userId
+     * @param $addressId
+     * @return bool|null
+     * @throws BusinessException
+     */
     public function delete ($userId, $addressId)
     {
         $address = $this->getAddress($userId, $addressId);
@@ -44,4 +51,40 @@ class AddressService extends BaseService
         }
         return $address->delete();
     }
+
+    public function saveAddress($userId, AddressInput $input)
+    {
+        if (!is_null($input->id)) {
+            $address = AddressService::getInstance()->getAddress($userId, $input->id);
+        } else {
+            $address = Address::new();
+            $address->user_id = $userId;
+        }
+
+        if ($input->isDefault) {
+            $this->resetDefault($userId);
+        }
+
+        $address->address_detial = $input->addressDetial;
+        $address->area_code = $input->areaCode;
+        $address->city = $input->city;
+        $address->county = $input->county;
+        $address->is_default = $input->isDefault;
+        $address->name = $input->name;
+        $address->postal_code = $input->province;
+        $address->tel = $input->tel;
+        $address->save();
+        return $address;
+    }
+
+    /**
+     * @param $userId
+     * @return bool|int
+     */
+    public function resetDefault($userId)
+    {
+        return Address::query()->where('user_id', $userId)->where('is_default', 1)->update('is_default', 0);
+    }
+
+
 }

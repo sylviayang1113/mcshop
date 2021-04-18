@@ -42,12 +42,24 @@ class AddressController extends WxController
 
     public function detail ()
     {
+        $id = $this->verifyId('id', 0);
+        $address = AddressService::getInstance()-getAddress($this->userId, $id);
+        if (empty($address)) {
+            return $this->badArgumentValue();
+        }
+        return $this->success($address);
 
     }
 
+    /**
+     * 保存地址
+     * @return JsonResponse
+     */
     public function save ()
     {
-
+        $input = AddressInput::new();
+        $address = AddressService::getInstance()->saveAddress($this->userId(), $input);
+        return $this->success($address->id);
     }
 
     public function delete (Request $request)
