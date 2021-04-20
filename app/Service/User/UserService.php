@@ -65,9 +65,6 @@ class UserService extends BaseService
     // 验证短信验证码
     public function checkCaptcha(string $mobile, string $code)
     {
-        if (!app()->environment('production')) {
-            return true;
-        }
         $key = 'register_captcha_'.$mobile;
         $isPass =  $code === Cache::get($key);
         if ($isPass)
@@ -84,8 +81,12 @@ class UserService extends BaseService
     // 设置手机短信验证码
     public function setCaptcha(string $mobile)
     {
-        // 随机生成6为验证吗
+        // 随机生成6位验证吗
         $code = random_int(100000, 999999);
+        if (!app()->environment('production')) {
+            // 非生产环境固定验证码
+            $code = 111111;
+        }
         $code = strval();
         // 保存手机号和验证码的关系
         Cache::put('register_captcha_'.$mobile, $code, 600);

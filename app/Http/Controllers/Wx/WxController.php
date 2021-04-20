@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Ramsey\Collection\Collection;
 
 class WxController extends Controller
 {
@@ -37,6 +39,39 @@ class WxController extends Controller
             $ret['data'] = $data;
         }
         return response()->json($ret);
+    }
+
+    protected function successPaginate($page)
+    {
+        $this->success($this->paginate($page));
+    }
+
+    public function paginate($page)
+    {
+        if ($page instanceof LengthAwarePaginator) {
+            return [
+              'total' => $page->total(),
+              'page' => $page->currentPage(),
+              'limit' => $page->perPage(),
+              'pages' => $page->lastPage()
+            ];
+        }
+        if ($page instanceof Collection) {
+            $page = $page->toArray();
+        }
+
+        if (is_array($page)) {
+            return $page;
+        }
+
+        $total = count($page);
+        return [
+            'total' => $total,
+            'page' => 1,
+            'limit' => $total,
+            'pages' => 1,
+            'list' => $page
+        ];
     }
 
     protected function success($data = null)

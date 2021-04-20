@@ -20,12 +20,7 @@ class AddressController extends WxController
     public function list ()
     {
         $list = AddressService::getInstance()->getAddressListByUserId($this->user()->id);
-        return $this->success([
-            'total' => $list->count(),
-            'page' => 1,
-            'list' => $list->toArray(),
-            'pages' => 1
-        ]);
+        return $this->successPaginate($list);
     }
 
     public function detail ()
