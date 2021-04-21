@@ -44,4 +44,17 @@ class CatalogService
         return Category::query()->where('level', 'l1')
             ->where('id', $id)->where('deleted', 0)->first();
     }
+
+    public function getCategory(int $id)
+    {
+        return Category::query()->find($id);
+    }
+
+    public function getL2ListByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return collect([]);
+        }
+        return Category::query()->whereIn('id', $ids)->get();
+    }
 }

@@ -102,4 +102,14 @@ class WxController extends Controller
     {
         return $user = Auth::guard('wx')->user();
     }
+
+    public function isLogin()
+    {
+        return !is_null($this->user());
+    }
+
+    public function userId()
+    {
+        return $this->user()->getAuthIdentifier();
+    }
 }

@@ -36,3 +36,9 @@ Route::get('catalog/delete', 'CatalogController@current'); // 分类目录当前
 # 商品模块-品牌
 Route::get('brand/list', 'BrandController@list'); // 品牌列表
 Route::get('brand/detail', 'BrandController@detail'); // 品牌详情
+
+# 商品模块-商品
+Route::get('goods/count', 'GoodsController@detail'); // 统计商品总数
+Route::get('goods/category', 'GoodsController@category'); // 根据分类获取商品列表数据
+Route::get('goods/list', 'GoodsController@list'); // 获得商品列表
+Route::get('goods/detail', 'GoodsController@detail'); // 获得商品详情

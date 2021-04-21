@@ -4,7 +4,74 @@
 namespace App\Service\Goods;
 
 
-class GoodsService
+use App\Models\Goods\Goods;
+use App\Service\BaseService;
+use Illuminate\Database\Query\Builder;
+
+class GoodsService extends BaseService
 {
+    /**
+     * 获取在售商品的数量
+     * @return int
+     */
+    public function countGoodsOnSale()
+    {
+        return Goods::query()->where('is_on_sale', 1)
+            ->where('deleted', 0)->count('id');
+    }
+
+    public function listGoods(
+        $categoryId,
+        $brandId,
+        $isNew,
+        $isHot,
+        $keyword,
+        $sort = 'add_time',
+        $order = 'desc',
+        $page = 1,
+        $limit = 10
+    )
+    {
+        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
+        if (!empty($categoryId)) {
+            $query = $query->where('category_id', $categoryId);
+        }
+
+        return $query->orderBy($sort, $order)
+            ->paginate($limit, ['*'], 'page', $page);
+
+    }
+
+    public function listL2Category($brandId, $isNew, $isHot, $keyword)
+    {
+        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
+        $categoryIds = $query->select(['category_id'])->pluck('category_id')->toArray();
+        return CatalogService::getInstance()->getL2ListByIds($categoryIds);
+    }
+
+    private function getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword)
+    {
+        $query = Goods::query()->where('is_on_sale', 1)
+            ->where('deleted', 0);
+        if (!empty($brandId)) {
+            $query = $query->where('brand_id', $brandId);
+        }
+
+        if (!empty($isNew)) {
+            $query = $query->where('brand_id', $isNew);
+        }
+
+        if (!empty($isHot)) {
+            $query = $query->where('brand_id', $isHot);
+        }
+
+        if (!empty($keyword)) {
+            $query = $query->where(function (Builder $query) use ($keyword) {
+                $query->where('keywords', 'like', "%$keyword%")
+                    ->orWhere('name', 'like', "%$keyword%");
+            });
+        }
+        return $query;
+    }
 
 }
