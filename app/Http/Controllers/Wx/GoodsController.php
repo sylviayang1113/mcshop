@@ -82,4 +82,21 @@ class GoodsController extends WxController
         $goodsList['filterCategoryList'] = $categoryList;
         return $this->success($goodsList);
     }
+
+    public function detail(Request $request)
+    {
+        $id = $request->input('id');
+        if (empty($id)) {
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        }
+        $info = GoodsService::getInstance()->getGoods($id);
+        if (empty($info)) {
+            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
+        }
+
+        $attr = GoodsService::getInstance()->getGoodsAttribute($id);
+        $spec = GoodsService::getInstance()->getGoodsSpecification($id);
+        $product = GoodsService::getInstance()->getGoodsProduct($id);
+        $issue = GoodsService::getInstance()->getGoodsIssue();
+    }
 }

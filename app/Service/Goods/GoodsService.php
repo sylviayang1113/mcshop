@@ -5,11 +5,46 @@ namespace App\Service\Goods;
 
 
 use App\Models\Goods\Goods;
+use App\Models\Goods\GoodsAttribute;
+use App\Models\Goods\GoodsProduct;
+use App\Models\Goods\GoodsSepecification;
+use App\Models\Goods\Issue;
 use App\Service\BaseService;
 use Illuminate\Database\Query\Builder;
 
 class GoodsService extends BaseService
 {
+    public function getGoods(int $id)
+    {
+        return Goods::query()->find($id);
+    }
+
+    public function getGoodsAttribute(int $goodsId)
+    {
+        return GoodsAttribute::query()->where('goods_id', $goodsId)
+            ->where('deleted', 0)->get();
+    }
+
+    public function getGoodsSpecification(int $goodsId)
+    {
+        $spec = GoodsSepecification::query()->where('goods_id', $goodsId)
+            ->where('deleted', 0)->get()->groupBy('specification');
+        return $spec->map(function ($v, $k) {
+           return ['name' => $k, 'valueList' => $v];
+        });
+
+    }
+
+    public function getGoodsProduct(int $goodsId)
+    {
+        return GoodsProduct::query()->where('goods_id', $goodsId)
+            ->where('deleted', 0)->get();
+    }
+
+    public function getGoodsIssue(int $page = 1, int $limit = 4)
+    {
+        return Issue::query()->forPage($page, $limit)->get();
+    }
     /**
      * 获取在售商品的数量
      * @return int

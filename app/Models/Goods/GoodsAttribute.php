@@ -1,12 +1,14 @@
 <?php
 
 
-namespace App\Models;
+namespace App\Models\Goods;
 
 
-class SearchHistory extends BaseModel
+use App\Models\BaseModel;
+
+class GoodsAttribute extends BaseModel
 {
-    protected $table = 'search_history';
+    protected $table = 'goods_attribute';
 
     /**
      * The attributes that are mass assignable.
@@ -14,9 +16,7 @@ class SearchHistory extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'user_id',
-        'keyword',
-        'from'
+
     ];
 
     /**
@@ -36,4 +36,5 @@ class SearchHistory extends BaseModel
     protected $casts = [
         'deleted' => 'boolean',
     ];
+
 }
