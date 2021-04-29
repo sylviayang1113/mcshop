@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\CodeResponse;
 use App\Exceptions\BusinessException;
+use App\Models\User\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -11,6 +12,14 @@ use Illuminate\Support\Facades\Notification;
 
 class UserService extends BaseService
 {
+    public function getUsers(array $userIds)
+    {
+        if (empty($userId)) {
+            return collect([]);
+        }
+        return User::query()->whereIn('id', $userIds)->where('deleted', 0)
+            ->get();
+    }
 
     /**
      * 根据用户名获取用户

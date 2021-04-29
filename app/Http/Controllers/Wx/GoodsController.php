@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Constant;
 use App\Models\SearchHistory;
+use App\Service\CommentService;
+use App\Service\Goods\BrandService;
 use App\Service\Goods\CatalogService;
 use App\Service\Goods\GoodsService;
 use App\Service\SearchHistoryService;
@@ -98,5 +100,7 @@ class GoodsController extends WxController
         $spec = GoodsService::getInstance()->getGoodsSpecification($id);
         $product = GoodsService::getInstance()->getGoodsProduct($id);
         $issue = GoodsService::getInstance()->getGoodsIssue();
+        $brand = $info->brand_id ? BrandService::getInstance()->getBrand($info->brand_id) : (object)[];
+        $comment = CommentService::getInstance()->getCommentByGoodsId($id);
     }
 }
