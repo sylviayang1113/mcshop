@@ -45,6 +45,13 @@ class GoodsService extends BaseService
     {
         return Issue::query()->forPage($page, $limit)->get();
     }
+
+    public function saveFootPrint($userId, $goodsId)
+    {
+        $footPrint = new FootPrint();
+        $footPrint->fill(['user_id' => $userId, 'goods_id' => $goodsId]);
+        return $footPrint->save();
+    }
     /**
      * 获取在售商品的数量
      * @return int

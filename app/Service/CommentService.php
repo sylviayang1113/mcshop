@@ -4,6 +4,7 @@
 namespace App\Service;
 
 
+use App\Constant;
 use App\Models\Comment;
 use App\Service\User\UserService;
 use Illuminate\Support\Arr;
@@ -13,7 +14,7 @@ class CommentService extends BaseService
     public function getCommentByGoodsId($goodsId, $page = 1, $limit = 2)
     {
         return Comment::query()->where('value_id', $goodsId)
-            ->where('type', 0)->where('deleted', 0)
+            ->where('type', Constant::COLLETCT_TYPE_GOODS)->where('deleted', 0)
             ->paginate($limit, ['*'], 'page', page);
     }
 

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Constant;
 use App\Models\SearchHistory;
+use App\Service\CollectService;
 use App\Service\CommentService;
 use App\Service\Goods\BrandService;
 use App\Service\Goods\CatalogService;
@@ -102,5 +103,25 @@ class GoodsController extends WxController
         $issue = GoodsService::getInstance()->getGoodsIssue();
         $brand = $info->brand_id ? BrandService::getInstance()->getBrand($info->brand_id) : (object)[];
         $comment = CommentService::getInstance()->getCommentByGoodsId($id);
+        $userHasCollect = 0;
+        if ($this->isLogin) {
+            $userHasCollect = CollectService::getInstance()->countByGoddsId($this->userId(), $id);
+            GoodsService::getInstance()->saveFootPrint($this->useId(), $id);
+        }
+        // todo 团购信息
+        // todo 系统配置
+        return $this->success([
+            'info' => $info,
+            'userHasCollect' => $userHasCollect,
+            'issue' => $issue,
+            'comment' => $comment,
+            'specificationList' => $spec,
+            'productList' => $product,
+            'attribute' => $attr,
+            'brand' => $brand,
+            'groupon' => [],
+            'share' => false,
+            'shareImg' => $info->share_url
+        ]);
     }
 }
