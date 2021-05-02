@@ -31,7 +31,7 @@ class GoodsService extends BaseService
             ->where('deleted', 0)->get()->groupBy('specification');
         return $spec->map(function ($v, $k) {
            return ['name' => $k, 'valueList' => $v];
-        });
+        })->values();
 
     }
 

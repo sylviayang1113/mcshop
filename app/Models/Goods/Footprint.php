@@ -6,9 +6,9 @@ namespace App\Models\Goods;
 
 use App\Models\BaseModel;
 
-class FootPrint extends BaseModel
+class Footprint extends BaseModel
 {
-    protected $table = 'foot_print';
+    protected $table = 'footprint';
 
     /**
      * The attributes that are mass assignable.

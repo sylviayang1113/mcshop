@@ -33,7 +33,7 @@ class Comment extends BaseModel
      */
     protected $casts = [
         'deleted' => 'boolean',
-        'pic_list' => 'array'
+        'pic_urls' => 'array'
     ];
 
 }

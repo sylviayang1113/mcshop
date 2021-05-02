@@ -14,6 +14,7 @@ use App\Service\Goods\CatalogService;
 use App\Service\Goods\GoodsService;
 use App\Service\SearchHistoryService;
 use http\Env\Request;
+use Illuminate\Validation\Rule;
 use phpDocumentor\Reflection\Utils;
 
 class GoodsController extends WxController
@@ -58,6 +59,25 @@ class GoodsController extends WxController
 
     public function list(Request $request)
     {
+//        $input = $request->validate(
+//            [
+//                'categoryId' => 'integer|digits_between:1, 20',
+//                'brandId' => 'integer|digits_between:1. 20',
+//                'keyword' => 'string',
+//                'isNew' => 'boolean',
+//                'isHot' => 'boolean',
+//                'page' => 'integer',
+//                'limit' => 'integer',
+//                'sort' => Rule::in(['add_time', 'retail_price', 'name']),
+//                'order' => Rule::in(['desc', 'asc']),
+//            ]
+//        );
+        $categoryId = $this->verifyId('categoryId');
+        $brandId = $this->verifyId('categoryId');
+        $keyword = $this->verifyString('keyword');
+        $isNew = $this->verifyBoolean('isNew');
+        $isHot = $this->verifyBoolean('isHot');
+
         $categoryId = $request->input('categoryId');
         $brandId = $request->input('brandId');
         $keyword = $request->input('keyword');
