@@ -9,6 +9,7 @@ use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Ramsey\Collection\Collection;
 
@@ -134,6 +135,10 @@ class WxController extends Controller
     {
         return  $this->verifyData($key, $default, 'integer');
     }
+    public function verifyEnum($key, $default = null, $enum = [])
+    {
+        return $this->verifyData($key, $default, Rule::in($enum));
+    }
 
     /**
      * @param $key
@@ -145,12 +150,10 @@ class WxController extends Controller
     public function verifyData($key, $default, $rule)
     {
         $value = request()->input($key, $default);
-        $validator = Validator::make([
-            $key => $value
-        ], [
-                $key => $rule
-            ]
-        );
+        $validator = Validator::make([$key => $value], [$key => $rule]);
+        if (is_null($default) && is_null($value)) {
+            return $value;
+        }
         if ($validator->fails()) {
             throw new BusinessException(CodeResponse::PARAM_VALUE_ILLEGAL);
         }
