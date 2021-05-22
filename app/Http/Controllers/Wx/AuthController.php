@@ -183,7 +183,7 @@ class AuthController extends Controller
             return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);
         }
 
-        // 防刷验证, 一分钟内只能请求一次， 当天只能请求一次
+        // 防刷验证, 一分钟内只能请求一次， 当天只能请求10次
         $lock = Cache::add('register_captcha_lock_'.$mobile, 1, 60);
         if (!$lock) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY);
@@ -192,7 +192,6 @@ class AuthController extends Controller
         $isPass = $this->userService->checkMobileSendCaptchaCount($mobile);
         if (!$isPass) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天发送不能超过10次');
-
         }
 
         $code = UserService::getInstance()->setCaptcha($mobile);

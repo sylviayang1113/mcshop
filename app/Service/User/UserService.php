@@ -59,6 +59,11 @@ class UserService extends BaseService
         return true;
     }
 
+    /**
+     * 发送短信验证码
+     * @param string $mobile
+     * @param string $code
+     */
     public function sendCaptchaMsg(string $mobile, string $code)
     {
         if (app()->environment('testing')) {
@@ -71,7 +76,13 @@ class UserService extends BaseService
         )->notify(new VerificationCode($code));
     }
 
-    // 验证短信验证码
+    /**
+     * 验证短信验证码
+     * @param string $mobile
+     * @param string $code
+     * @return bool
+     * @throws BusinessException
+     */
     public function checkCaptcha(string $mobile, string $code)
     {
         $key = 'register_captcha_'.$mobile;
@@ -87,7 +98,12 @@ class UserService extends BaseService
 
     }
 
-    // 设置手机短信验证码
+    /**
+     * 生成短信验证码
+     * @param string $mobile
+     * @return string
+     * @throws \Exception
+     */
     public function setCaptcha(string $mobile)
     {
         // 随机生成6位验证吗
