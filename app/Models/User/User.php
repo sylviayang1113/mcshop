@@ -22,6 +22,9 @@ class User extends BaseModel implements
 
     protected $table = 'user';
 
+    protected const CREATED_AT = 'add_time';
+    protected  const UPDATED_AT = 'update_time';
+
     /**
      * The attributes that are mass assignable.
      *

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
 use App\Http\Controllers\Controller;
+use App\Models\User\User;
 use App\Service\UserService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -172,7 +173,7 @@ class AuthController extends Controller
         if (empty($mobile)) {
             return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
-        $validator = Validator::make(['mobile' => $mobile], ['mobile' =>'regex:/^1[0-9]{10}$']);
+        $validator = Validator::make(['mobile' => $mobile], ['mobile' =>'regex:/^1[0-9]{10}$/']);
         if ($validator->fails()) {
             return $this->fail(CodeResponse::AUTH_INVALID_MOBILE);
         }
