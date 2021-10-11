@@ -4,6 +4,7 @@
 namespace App\Service\Goods;
 
 
+use App\Inputs\GoodsListInput;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsAttribute;
 use App\Models\Goods\GoodsProduct;
@@ -62,25 +63,15 @@ class GoodsService extends BaseService
             ->where('deleted', 0)->count('id');
     }
 
-    public function listGoods(
-        $categoryId,
-        $brandId,
-        $isNew,
-        $isHot,
-        $keyword,
-        $sort = 'add_time',
-        $order = 'desc',
-        $page = 1,
-        $limit = 10
-    )
+    public function listGoods(GoodsListInput $input)
     {
-        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
-        if (!empty($categoryId)) {
-            $query = $query->where('category_id', $categoryId);
+        $query = $this->getQueryByGoodsFilter($input);
+        if (!empty($input->categoryId)) {
+            $query = $query->where('category_id', $input->categoryId);
         }
 
-        return $query->orderBy($sort, $order)
-            ->paginate($limit, ['*'], 'page', $page);
+        return $query->orderBy($input->sort, $input->order)
+            ->paginate($input->limit, ['*'], 'page', $input->page);
 
     }
 
@@ -91,26 +82,26 @@ class GoodsService extends BaseService
         return CatalogService::getInstance()->getL2ListByIds($categoryIds);
     }
 
-    private function getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword)
+    private function getQueryByGoodsFilter(GoodsListInput  $input)
     {
         $query = Goods::query()->where('is_on_sale', 1)
             ->where('deleted', 0);
-        if (!empty($brandId)) {
-            $query = $query->where('brand_id', $brandId);
+        if (!empty($input->brandId)) {
+            $query = $query->where('brand_id', $input->brandId);
         }
 
-        if (!empty($isNew)) {
-            $query = $query->where('brand_id', $isNew);
+        if (!empty($input->isNew)) {
+            $query = $query->where('brand_id', $input->isNew);
         }
 
-        if (!empty($isHot)) {
-            $query = $query->where('brand_id', $isHot);
+        if (!empty($input->isHot)) {
+            $query = $query->where('brand_id', $input->isHot);
         }
 
-        if (!empty($keyword)) {
-            $query = $query->where(function (Builder $query) use ($keyword) {
-                $query->where('keywords', 'like', "%$keyword%")
-                    ->orWhere('name', 'like', "%$keyword%");
+        if (!empty($input->keyword)) {
+            $query = $query->where(function (Builder $query) use ($input->keyword) {
+                $query->where('keywords', 'like', "%$input->keyword%")
+                    ->orWhere('name', 'like', "%$input->keyword%");
             });
         }
         return $query;

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
 use App\Constant;
+use App\Inputs\GoodsList;
 use App\Models\SearchHistory;
 use App\Service\CollectService;
 use App\Service\CommentService;
@@ -63,24 +64,15 @@ class GoodsController extends WxController
      */
     public function list()
     {
-        $categoryId = $this->verifyId('categoryId');
-        $brandId = $this->verifyId('brandId');
-        $keyword = $this->verifyString('keyword');
-        $isNew = $this->verifyBoolean('isNew');
-        $isHot = $this->verifyBoolean('isHot');
-        $page = $this->verifyInteger('page', 1);
-        $limit = $this->verifyInteger('limit', 10);
-        $sort = $this->verifyEnum('sort', 'add_time', ['add_time', 'retail_price', 'name']);
-        $order = $this->verifyEnum('order', 'desc', ['desc', 'asc']);
+        $input = new GoodsListInput();
+        $input = $input->fill();
 
         if ($this->isLogin() && !empty($keyword)) {
             SearchHistoryService::getInstance()->save($this->userId(), $keyword, Constant::SEARCH_HISTORY_FROM_WX);
         }
 
         // todo 优化参数传递
-        $goodsList = GoodsService::getInstance()->listGoods(
-            $categoryId, $brandId, $isNew, $isHot, $keyword,
-            $sort, $page, $limit);
+        $goodsList = GoodsService::getInstance()->listGoods($input);
 
         $categoryList = GoodsService::getInstance()->list2L2Category($brandId, $isNew, $isHot, $keyword);
 

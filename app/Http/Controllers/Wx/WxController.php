@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Http\VerifyRequestInput;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -15,6 +16,7 @@ use Ramsey\Collection\Collection;
 
 class WxController extends Controller
 {
+    use VerifyRequestInput;
     protected $only;
     protected $except;
     public function __construct()
