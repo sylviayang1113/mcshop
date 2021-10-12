@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
 use App\Constant;
+use App\Http\VerifyRequestInput;
 use App\Inputs\GoodsList;
 use App\Models\SearchHistory;
 use App\Service\CollectService;
@@ -20,6 +21,8 @@ use phpDocumentor\Reflection\Utils;
 
 class GoodsController extends WxController
 {
+
+    use VerifyRequestInput;
 
     protected $only = [];
 
