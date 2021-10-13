@@ -75,9 +75,9 @@ class GoodsService extends BaseService
 
     }
 
-    public function listL2Category($brandId, $isNew, $isHot, $keyword)
+    public function listL2Category(GoodsListInput $input)
     {
-        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
+        $query = $this->getQueryByGoodsFilter($input);
         $categoryIds = $query->select(['category_id'])->pluck('category_id')->toArray();
         return CatalogService::getInstance()->getL2ListByIds($categoryIds);
     }
@@ -99,7 +99,7 @@ class GoodsService extends BaseService
         }
 
         if (!empty($input->keyword)) {
-            $query = $query->where(function (Builder $query) use ($input->keyword) {
+            $query = $query->where(function (Builder $query) use ($input) {
                 $query->where('keywords', 'like', "%$input->keyword%")
                     ->orWhere('name', 'like', "%$input->keyword%");
             });

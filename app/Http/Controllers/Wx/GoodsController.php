@@ -8,7 +8,7 @@ use App\CodeResponse;
 use App\Constant;
 use App\Http\VerifyRequestInput;
 use App\Inputs\GoodsList;
-use App\Models\SearchHistory;
+use App\Inputs\GoodsListInput;
 use App\Service\CollectService;
 use App\Service\CommentService;
 use App\Service\Goods\BrandService;
@@ -16,8 +16,6 @@ use App\Service\Goods\CatalogService;
 use App\Service\Goods\GoodsService;
 use App\Service\SearchHistoryService;
 use http\Env\Request;
-use Illuminate\Validation\Rule;
-use phpDocumentor\Reflection\Utils;
 
 class GoodsController extends WxController
 {
@@ -67,17 +65,15 @@ class GoodsController extends WxController
      */
     public function list()
     {
-        $input = new GoodsListInput();
-        $input = $input->fill();
+        $input = GoodsListInput::new();
 
         if ($this->isLogin() && !empty($keyword)) {
             SearchHistoryService::getInstance()->save($this->userId(), $keyword, Constant::SEARCH_HISTORY_FROM_WX);
         }
 
-        // todo 优化参数传递
         $goodsList = GoodsService::getInstance()->listGoods($input);
 
-        $categoryList = GoodsService::getInstance()->list2L2Category($brandId, $isNew, $isHot, $keyword);
+        $categoryList = GoodsService::getInstance()->list2L2Category($input);
 
         $goodsList = $this->paginate($goodsList);
         $goodsList['filterCategoryList'] = $categoryList;
@@ -101,7 +97,7 @@ class GoodsController extends WxController
         $userHasCollect = 0;
         if ($this->isLogin) {
             $userHasCollect = CollectService::getInstance()->countByGoddsId($this->userId(), $id);
-            GoodsService::getInstance()->saveFootPrint($this->useId(), $id);
+            GoodsService::getInstance()->saveFootPrint($this->userId(), $id);
         }
         // todo 团购信息
         // todo 系统配置
