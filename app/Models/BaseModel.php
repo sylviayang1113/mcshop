@@ -17,6 +17,10 @@ class BaseModel extends Model
     public function toArray()
     {
         $items = parent::toArray();
+        //如果有过滤空字段的需求
+//        $items = array_filter($items, function ($item) {
+//            return !is_null($item);
+//        });
         $keys = array_keys($items);
         $keys = array_map(function ($key) {
             return lcfirst(Str::studly($key));
