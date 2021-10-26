@@ -16,4 +16,11 @@ class CouponTest extends TestCase
         $this->assertLitemallApiGet('wx/coupon/list');
     }
 
+    public function testMyList()
+    {
+        $this->assertLitemallApiGet('wx/coupon/myList');
+        $this->assertLitemallApiGet('wx/coupon/myList?status=1');
+        $this->assertLitemallApiGet('wx/coupon/myList?status=2');
+    }
+
 }

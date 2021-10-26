@@ -51,14 +51,21 @@ class WxController extends Controller
         $this->success($this->paginate($page));
     }
 
-    public function paginate($page)
+    /**
+     * @param $page
+     * @param null|array$list
+     * @return array
+     */
+    public function paginate($page, $list = null)
     {
         if ($page instanceof LengthAwarePaginator) {
+            $total = $page->total();
             return [
               'total' => $page->total(),
-              'page' => $page->currentPage(),
+              'page' => $total == 0 ? 0 : $page->currentPage(),
               'limit' => $page->perPage(),
-              'pages' => $page->lastPage()
+              'pages' => $total == 0 ? 0 : $page->lastPage(),
+              'list' => $list ?? $page->items()
             ];
         }
         if ($page instanceof Collection) {
@@ -71,9 +78,9 @@ class WxController extends Controller
 
         $total = count($page);
         return [
-            'total' => $total,
+            'total' => $total == 0 ? 0 : 1,
             'page' => 1,
-            'limit' => $total,
+            'limit' => $total == 0 ? 0 : 1,
             'pages' => 1,
             'list' => $page
         ];
