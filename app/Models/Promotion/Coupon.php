@@ -17,6 +17,10 @@ class Coupon extends BaseModel
      * @var array
      */
     protected $fillable = [
+        'coupon_id',
+        'user_id',
+        'start_time',
+        'end_time'
 
     ];
 

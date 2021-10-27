@@ -31,11 +31,12 @@ class BaseService
 
     /**
      * @param array $codeResponce
+     * @param string $info
      * @throws BusinessException
      */
-    public function throwBusinessException (array $codeResponce)
+    public function throwBusinessException (array $codeResponce, $info = '')
     {
-        throw new BusinessException($codeResponce);
+        throw new BusinessException($codeResponce, $info);
     }
 
 }

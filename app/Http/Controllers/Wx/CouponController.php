@@ -4,10 +4,13 @@
 namespace App\Http\Controllers\Wx;
 
 
+use App\CodeResponse;
+use App\Constant;
 use App\Exceptions\BusinessException;
 use App\Inputs\PageInput;
 use App\Models\Promotion\CouponUser;
 use App\Service\Promotion\CouponService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
 class CouponController extends WxController
@@ -61,6 +64,16 @@ class CouponController extends WxController
 
     public function selectList() {}
 
-    public function receive() {}
+    /**
+     * 领取优惠券
+     * @return JsonResponse
+     * @throws BusinessException
+     */
+    public function receive()
+    {
+        $couponId = $this->verifyId('couponId', 0);
+        CouponService::getInstance()->receive($this->userId(), $couponId);
+        return $this->success();
+    }
 
 }
