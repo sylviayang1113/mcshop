@@ -100,7 +100,7 @@ class CouponService extends BaseService
         }
 
         //用户领券记录
-        $couponUser = new CouponUser();
+        $couponUser = CouponUser::new();
         if ($coupon->time_type == Constant::TIME_TYPE_TIME) {
             $startTime = $coupon->start_time;
             $endTime = $coupon->end_time;

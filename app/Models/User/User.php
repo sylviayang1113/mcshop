@@ -20,21 +20,8 @@ class User extends BaseModel implements
     use HasFactory, Notifiable;
     use Authenticatable, Authorizable;
 
-    protected $table = 'user';
-
     protected const CREATED_AT = 'add_time';
     protected  const UPDATED_AT = 'update_time';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -42,16 +29,8 @@ class User extends BaseModel implements
      * @var array
      */
     protected $hidden = [
-
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
+        'password',
+        'deleted'
     ];
 
     public function getJWTIdentifier()
