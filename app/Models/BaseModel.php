@@ -9,6 +9,15 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * Class BaseModel
+ *
+ * @package App\Models
+ * @method static Builder|BaseModel newModelQuery()
+ * @method static Builder|BaseModel newQuery()
+ * @method static Builder|BaseModel query()
+ * @mixin Eloquent
+ */
 class BaseModel extends Model
 {
     public const CREATED_AT = 'add_time';
