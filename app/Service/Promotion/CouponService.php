@@ -12,7 +12,6 @@ use App\Models\Promotion\Coupon;
 use App\Models\Promotion\CouponUser;
 use App\Service\BaseService;
 use Carbon\Carbon;
-use phpDocumentor\Reflection\Utils;
 
 class CouponService extends BaseService
 {
