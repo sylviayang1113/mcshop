@@ -5,9 +5,12 @@ namespace App\Models\Goods;
 
 
 use App\Models\BaseModel;
+use App\Models\BooleanSoftDeletes;
 
 class Goods extends BaseModel
 {
+    use BooleanSoftDeletes;
+
     /**
      * The attributes that should be cast to native types.
      *
