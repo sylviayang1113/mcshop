@@ -22,24 +22,21 @@ class GoodsService extends BaseService
 
     public function getGoodsAttribute(int $goodsId)
     {
-        return GoodsAttribute::query()->where('goods_id', $goodsId)
-            ->where('deleted', 0)->get();
+        return GoodsAttribute::query()->where('goods_id', $goodsId)->get();
     }
 
     public function getGoodsSpecification(int $goodsId)
     {
-        $spec = GoodsSepecification::query()->where('goods_id', $goodsId)
-            ->where('deleted', 0)->get()->groupBy('specification');
+        $spec = GoodsSepecification::query()->where('goods_id', $goodsId)->get()->groupBy('specification');
         return $spec->map(function ($v, $k) {
-           return ['name' => $k, 'valueList' => $v];
+            return ['name' => $k, 'valueList' => $v];
         })->values();
 
     }
 
     public function getGoodsProduct(int $goodsId)
     {
-        return GoodsProduct::query()->where('goods_id', $goodsId)
-            ->where('deleted', 0)->get();
+        return GoodsProduct::query()->where('goods_id', $goodsId)->get();
     }
 
     public function getGoodsIssue(int $page = 1, int $limit = 4)
@@ -53,14 +50,14 @@ class GoodsService extends BaseService
         $footPrint->fill(['user_id' => $userId, 'goods_id' => $goodsId]);
         return $footPrint->save();
     }
+
     /**
      * 获取在售商品的数量
      * @return int
      */
     public function countGoodsOnSale()
     {
-        return Goods::query()->where('is_on_sale', 1)
-            ->where('deleted', 0)->count('id');
+        return Goods::query()->where('is_on_sale', 1)->count('id');
     }
 
     public function listGoods(GoodsListInput $input)
@@ -82,10 +79,9 @@ class GoodsService extends BaseService
         return CatalogService::getInstance()->getL2ListByIds($categoryIds);
     }
 
-    private function getQueryByGoodsFilter(GoodsListInput  $input)
+    private function getQueryByGoodsFilter(GoodsListInput $input)
     {
-        $query = Goods::query()->where('is_on_sale', 1)
-            ->where('deleted', 0);
+        $query = Goods::query()->where('is_on_sale', 1);
         if (!empty($input->brandId)) {
             $query = $query->where('brand_id', $input->brandId);
         }

@@ -17,7 +17,7 @@ class UserService extends BaseService
         if (empty($userId)) {
             return collect([]);
         }
-        return User::query()->whereIn('id', $userIds)->where('deleted', 0)
+        return User::query()->whereIn('id', $userIds)
             ->get();
     }
 
@@ -30,7 +30,7 @@ class UserService extends BaseService
     public function getByUsername($username)
     {
         return User::query()->where($username, 'username')
-            ->where('deleted', 0)->first();
+            ->first();
     }
 
     /**
@@ -42,14 +42,14 @@ class UserService extends BaseService
     public function getByMobile($mobile)
     {
         return User::query()->where($mobile, 'mobile')
-            ->where('deleted', 0)->first();
+            ->first();
     }
 
-    public function checkMobileSendCaptchaCount(String $mobile)
+    public function checkMobileSendCaptchaCount(string $mobile)
     {
-        $countKey = 'register_captcha_count_'.$mobile;
+        $countKey = 'register_captcha_count_' . $mobile;
         if (Cache::has($countKey)) {
-            $count = Cache::increment('register_captcha_count_'.$mobile);
+            $count = Cache::increment('register_captcha_count_' . $mobile);
             if ($count > 10) {
                 return false;
             }
@@ -85,10 +85,9 @@ class UserService extends BaseService
      */
     public function checkCaptcha(string $mobile, string $code)
     {
-        $key = 'register_captcha_'.$mobile;
-        $isPass =  $code === Cache::get($key);
-        if ($isPass)
-        {
+        $key = 'register_captcha_' . $mobile;
+        $isPass = $code === Cache::get($key);
+        if ($isPass) {
             Cache::forget($key);
 
             return true;
@@ -114,7 +113,7 @@ class UserService extends BaseService
         }
         $code = strval();
         // 保存手机号和验证码的关系
-        Cache::put('register_captcha_'.$mobile, $code, 600);
+        Cache::put('register_captcha_' . $mobile, $code, 600);
         return $code;
     }
 }

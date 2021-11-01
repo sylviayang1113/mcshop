@@ -17,20 +17,19 @@ class CouponService extends BaseService
 {
     public function getCoupon($id, $columns = ['*'])
     {
-        return Coupon::query()->where('deleted', 0)->find($id, $columns);
+        return Coupon::query()->find($id, $columns);
     }
 
     public function getCoupons(array $ids, $columns = ['*'])
     {
         return Coupon::query()->whereIn('id', $ids)
-            ->where('deleted', 0)->get($columns);
+            ->get($columns);
     }
 
-    public function list (PageInput $page, $columns = ['*'])
+    public function list(PageInput $page, $columns = ['*'])
     {
         return Coupon::query()->where('type', Constant::TYPE_COMMON)
             ->where('status', Constant::STATUS_NORMAL)
-            ->Where('deleted', 0)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
 
@@ -40,7 +39,6 @@ class CouponService extends BaseService
     {
         return CouponUser::query()->where('user_id', $userId)
             ->where('status', $status)
-            ->where('deleted', 0)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }
@@ -48,14 +46,14 @@ class CouponService extends BaseService
     public function countCoupon($couponId)
     {
         return CouponUser::query()->where('couponId', $couponId)
-            ->where('deleted', 0)->count('id');
+            ->count('id');
     }
 
     public function countCouponByUserId($userId, $couponId)
     {
         return CouponUser::query()->where('couponId', $couponId)
             ->where('user_id', $userId)
-            ->where('deleted', 0)->count('id');
+            ->count('id');
 
     }
 

@@ -5,7 +5,6 @@ namespace App\Service\Goods;
 
 
 use App\Models\Goods\Category;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,7 +18,7 @@ class CatalogService
     public function getL1List()
     {
         return Category::query()->where('level', 'L1')
-            ->where('deleted', 0)->get();
+            ->get();
     }
 
     /**
@@ -30,8 +29,8 @@ class CatalogService
     public function getL2ListByPid(int $pid)
     {
         return Category::query()->where('level', 'l2')
-            ->where('pid', $pid)->where('deleted', 0)
-            -get();
+                ->where('pid', $pid)
+            - get();
     }
 
     /**
@@ -42,7 +41,7 @@ class CatalogService
     public function getL1ById(int $id)
     {
         return Category::query()->where('level', 'l1')
-            ->where('id', $id)->where('deleted', 0)->first();
+            ->where('id', $id)->first();
     }
 
     public function getCategory(int $id)

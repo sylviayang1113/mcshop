@@ -4,8 +4,6 @@
 namespace App\Service;
 
 
-
-use App\CodeResponse;
 use App\Exceptions\BusinessException;
 
 class BaseService
@@ -24,6 +22,7 @@ class BaseService
     private function __construct()
     {
     }
+
     private function __clone()
     {
 
@@ -34,7 +33,7 @@ class BaseService
      * @param string $info
      * @throws BusinessException
      */
-    public function throwBusinessException (array $codeResponce, $info = '')
+    public function throwBusinessException(array $codeResponce, $info = '')
     {
         throw new BusinessException($codeResponce, $info);
     }
