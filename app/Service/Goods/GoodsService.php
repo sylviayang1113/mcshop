@@ -15,6 +15,12 @@ use Illuminate\Database\Query\Builder;
 
 class GoodsService extends BaseService
 {
+
+    public function getGoodsListByIds(array $ids)
+    {
+        return Goods::query()->whereIn('id', $ids)->get();
+    }
+
     public function getGoods(int $id)
     {
         return Goods::query()->find($id);

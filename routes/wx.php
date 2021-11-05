@@ -45,5 +45,7 @@ Route::get('goods/detail', 'GoodsController@detail'); // 获得商品详情
 
 Route::get('coupon/list', 'CouponController@list'); //优惠券列表
 Route::get('coupon/myList', 'CouponController@myList'); //我的优惠券列表
-//Route::any('coupon/selectList', ''); //当前订单可用优惠券列表
+#Route::any('coupon/selectList', ''); //当前订单可用优惠券列表
 Route::post('coupon/receive', 'CouponController@receive'); //优惠券领取
+
+Route::get('groupon/list', 'GrouponController@list'); // 团购列表
