@@ -18,6 +18,9 @@ class GoodsService extends BaseService
 
     public function getGoodsListByIds(array $ids)
     {
+        if (empty($ids)) {
+            return collect();
+        }
         return Goods::query()->whereIn('id', $ids)->get();
     }
 
