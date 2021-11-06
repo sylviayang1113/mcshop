@@ -14,7 +14,7 @@ class GrouponService extends BaseService
 {
     public function getGrouponRules(PageInput $page, $columns = ['*'])
     {
-        return GrouponRules::whereStatus(GrouponEmuns::STATUS_ON)
+        return GrouponRules::whereStatus(GrouponEmuns::RULE_STATUS_ON)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page'. $page->page);
     }

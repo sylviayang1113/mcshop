@@ -12,6 +12,7 @@ use App\Models\Promotion\Coupon;
 use App\Models\Promotion\CouponUser;
 use App\Service\BaseService;
 use Carbon\Carbon;
+use PhpParser\Builder;
 
 class CouponService extends BaseService
 {
@@ -38,7 +39,9 @@ class CouponService extends BaseService
     public function myList($userId, $status, PageInput $page, $columns = ['*'])
     {
         return CouponUser::query()->where('user_id', $userId)
-            ->where('status', $status)
+            ->when(!is_null($status), function ( Builder $query) use ($status) {
+                return $query->where('status', $status);
+            })
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }
