@@ -11,6 +11,7 @@ use App\Inputs\PageInput;
 use App\Models\Promotion\Groupon;
 use App\Models\Promotion\GrouponRules;
 use App\Service\BaseService;
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 
 class GrouponService extends BaseService
@@ -91,5 +92,40 @@ class GrouponService extends BaseService
             $this->throwBusinessException(CodeResponse::GROUPON_JOIN);
         }
         return;
+    }
+
+    public function getGroupon($id, $columns = ['*'])
+    {
+        return Groupon::query()->find($id, $columns);
+    }
+
+    public function openOrJoinGroupon($userId, $orderId, $ruleId, $linkId = null)
+    {
+        // 如果是团购项目，添加团购信息
+        if ($ruleId == null || $ruleId <= 0) {
+            return $linkId;
+        }
+
+        $groupon = Groupon::new();
+        $groupon->order_id = $orderId;
+        $groupon->user_id = $userId;
+        $groupon->status = GrouponEmuns::STATUS_NONE;
+        $groupon->rules_id = $ruleId;
+
+        // 开团的情况
+        if ($linkId == null || $linkId <= 0) {
+            $groupon->creator_user_id = $userId;
+            $groupon->creator_user_time = Carbon::now()->toDateTimeString();
+            $groupon->groupon_id = 0;
+            $groupon->save();
+            return  $groupon->id;
+        }
+
+        $openGroupon = $this->getGroupon($linkId);
+        $groupon->creator_user_id = $openGroupon->creator_user_id;
+        $groupon->groupon_id = $linkId;
+        $groupon->share_url = $openGroupon->share_url;
+        $groupon->save();
+        return $linkId;
     }
 }
