@@ -128,4 +128,54 @@ class GrouponService extends BaseService
         $groupon->save();
         return $linkId;
     }
+
+    /**
+     * 支付成功，更新团购活动
+     * @param $orderId
+     * @return BusinessException
+     */
+    public function getGrouponByOrderId($orderId)
+    {
+        return Groupon::whereOrderId($orderId)->first();
+    }
+    public function payGrouponOrder($orderId)
+    {
+        $groupon = $this->getGrouponByOrderId($orderId);
+        if (is_null($groupon)) {
+            return;
+        }
+        $rule = $this->getGrouponRulesById($groupon->rule_id);
+        if ($groupon->groupon_id == 0) {
+            $groupon->share_url = $this->createGrouponShareImage();
+        }
+        $groupon->status = GrouponEmuns::RULE_STATUS_ON;
+        $isSuccess = $groupon->save();
+        if (!$isSuccess) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+
+        if ($groupon->groupon_id == 0) {
+            return;
+        }
+
+        $joinCount = $this->countGrouponJoin($groupon->groupon_id);
+        if ($joinCount < $rule->discount_member - 1) {
+            return;
+        }
+
+        $row = Groupon::query()->where(function (Builder $builder) use ($groupon) {
+            return $builder->where('groupon_id', $groupon->groupon_id)
+                ->orWhere('id', $groupon->group_id);
+        })->update(['status' => GrouponEmuns::STATUS_SUCCEED]);
+
+        if ($row == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+        return;
+    }
+
+    public function createGrouponShareImage()
+    {
+        return '';
+    }
 }
