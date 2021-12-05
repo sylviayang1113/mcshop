@@ -13,6 +13,7 @@ use App\Models\Promotion\GrouponRules;
 use App\Service\BaseService;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class GrouponService extends BaseService
 {
@@ -146,7 +147,7 @@ class GrouponService extends BaseService
         }
         $rule = $this->getGrouponRulesById($groupon->rule_id);
         if ($groupon->groupon_id == 0) {
-            $groupon->share_url = $this->createGrouponShareImage();
+            $groupon->share_url = $this->createGrouponShareImage($rule);
         }
         $groupon->status = GrouponEmuns::RULE_STATUS_ON;
         $isSuccess = $groupon->save();
@@ -174,8 +175,18 @@ class GrouponService extends BaseService
         return;
     }
 
-    public function createGrouponShareImage()
+    /**
+     * 创建团购分享图片
+     *
+     * 1. 获取链接，创建二维码
+     * 2. 合成图片
+     * 3. 保存图片，返回图片地址
+     * @return string
+     */
+    public function createGrouponShareImage(GrouponRules $rules)
     {
-        return '';
+        $shareUrl = 'http://mcshop.test/'.$rules->goods_id;
+        $qrCode = QrCode::format('png')->margin(1)->size(299)->generate($shareUrl);
+        return $qrCode;
     }
 }

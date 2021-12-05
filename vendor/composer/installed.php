@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '40c00ae24855f0354a0f3df53fff76759565243c',
+    'reference' => '71cf3a10c7b5724a52ed9bd31dd7f07b68f453bb',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -19,6 +19,15 @@
       array (
       ),
       'reference' => '8d8f88b3b3830916be94292c1fbce84433efb1aa',
+    ),
+    'bacon/bacon-qr-code' => 
+    array (
+      'pretty_version' => '1.0.3',
+      'version' => '1.0.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '5a91b62b9d37cee635bbf8d553f4546057250bee',
     ),
     'barryvdh/laravel-ide-helper' => 
     array (
@@ -571,7 +580,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '40c00ae24855f0354a0f3df53fff76759565243c',
+      'reference' => '71cf3a10c7b5724a52ed9bd31dd7f07b68f453bb',
     ),
     'laravel/sail' => 
     array (
@@ -1155,6 +1164,15 @@
       array (
       ),
       'reference' => '749042a2315705d2dfbbc59234dd9ceb22bf3ff0',
+    ),
+    'simplesoftwareio/simple-qrcode' => 
+    array (
+      'pretty_version' => '2.0.0',
+      'version' => '2.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '90b2282dd29be1e52565e9832dc23af41610ea07',
     ),
     'swiftmailer/swiftmailer' => 
     array (
