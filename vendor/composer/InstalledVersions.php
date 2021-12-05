@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '71cf3a10c7b5724a52ed9bd31dd7f07b68f453bb',
+    'reference' => '0a8933fecea2df7706a59e88e82c0e8a6407b481',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -561,6 +561,15 @@ private static $installed = array (
         0 => 'v8.25.0',
       ),
     ),
+    'intervention/image' => 
+    array (
+      'pretty_version' => '2.7.0',
+      'version' => '2.7.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '9a8cc99d30415ec0b3f7649e1647d03a55698545',
+    ),
     'justinrainbow/json-schema' => 
     array (
       'pretty_version' => '5.2.11',
@@ -593,7 +602,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '71cf3a10c7b5724a52ed9bd31dd7f07b68f453bb',
+      'reference' => '0a8933fecea2df7706a59e88e82c0e8a6407b481',
     ),
     'laravel/sail' => 
     array (

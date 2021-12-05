@@ -13,6 +13,8 @@ use App\Models\Promotion\GrouponRules;
 use App\Service\BaseService;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
+use Intervention\Image\AbstractFont;
+use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class GrouponService extends BaseService
@@ -187,6 +189,15 @@ class GrouponService extends BaseService
     {
         $shareUrl = 'http://mcshop.test/'.$rules->goods_id;
         $qrCode = QrCode::format('png')->margin(1)->size(299)->generate($shareUrl);
-        return $qrCode;
+        $goodsImage = Image::make($rules->pic_url)->resize(660, 660);
+        $image = Image::make(resource_path('image/back_groupon.png'))
+            ->insert($qrCode, 'top-left', 460, 770)
+            ->insert($goodsImage, 'top-left', 71, 69, )
+            ->text($rules->goods_name, 65, 867, function (AbstractFont $font) {
+                $font->color(array(167, 136, 69));
+                $font->size(28);
+                $font->file(resource_path('ttf/msyh.ttf'));
+            });
+        return $image->encode();
     }
 }
