@@ -13,6 +13,8 @@ use App\Models\Promotion\GrouponRules;
 use App\Service\BaseService;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -187,7 +189,7 @@ class GrouponService extends BaseService
      */
     public function createGrouponShareImage(GrouponRules $rules)
     {
-        $shareUrl = 'http://mcshop.test/'.$rules->goods_id;
+        $shareUrl = \route('home.redirectShareUrl', ['type' => 'groupon', 'id' => $rules->goods_id]);
         $qrCode = QrCode::format('png')->margin(1)->size(299)->generate($shareUrl);
         $goodsImage = Image::make($rules->pic_url)->resize(660, 660);
         $image = Image::make(resource_path('image/back_groupon.png'))
@@ -198,6 +200,9 @@ class GrouponService extends BaseService
                 $font->size(28);
                 $font->file(resource_path('ttf/msyh.ttf'));
             });
-        return $image->encode();
+        $filePath = 'groupon/'.Carbon::now()->toDateString().'/'.Str::random().'png';
+        Storage::disk('public')->put($filePath, $image->encode());
+        return Storage::url($filePath);
+
     }
 }

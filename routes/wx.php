@@ -43,9 +43,13 @@ Route::get('goods/category', 'GoodsController@category'); // 根据分类获取�
 Route::get('goods/list', 'GoodsController@list'); // 获得商品列表
 Route::get('goods/detail', 'GoodsController@detail'); // 获得商品详情
 
+# 营销模块-优惠券
 Route::get('coupon/list', 'CouponController@list'); //优惠券列表
 Route::get('coupon/myList', 'CouponController@myList'); //我的优惠券列表
 #Route::any('coupon/selectList', ''); //当前订单可用优惠券列表
 Route::post('coupon/receive', 'CouponController@receive'); //优惠券领取
 
+# 营销模块-团购
 Route::get('groupon/list', 'GrouponController@list'); // 团购列表
+
+Route::get('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('home.redirectShareUrl');
