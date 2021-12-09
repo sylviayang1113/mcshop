@@ -34,6 +34,8 @@ class CartService extends BaseService
         $cart->user_id = $userId;
         $cart->checked = true;
         $cart->number = $number;
+        $cart->goods_id = $goods->id;
+        $cart->product_id = $product->id;
         $cart->save();
         return $cart;
     }

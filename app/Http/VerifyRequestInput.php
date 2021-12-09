@@ -13,7 +13,7 @@ trait VerifyRequestInput
 {
     public function verifyId($key, $default = null)
     {
-        return  $this->verifyData($key, $default, 'integer|digits_between:1, 20');
+        return  $this->verifyData($key, $default, 'integer|digits_between:1, 20|min:1');
     }
 
     public function verifyString($key, $default = null)
