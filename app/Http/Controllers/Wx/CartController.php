@@ -100,11 +100,22 @@ class CartController extends WxController
     public function delete()
     {
         $productIds = $this->verifyArrayNotEmpty('productIds', []);
+        CartService::getInstance()->delete($this->userId(), $productIds);
+        $list = CartService::getInstance()->list($this->userId());
+        return $this->success($list);
 
     }
 
     public function checked()
     {
+        $productIds = $this->verifyArrayNotEmpty('productIds', []);
+        $isChecked = $this->verifyBoolean('isChecked');
+        CartService::getInstance()->updateChecked(
+            $this->userId(),
+            $productIds,
+            $isChecked == 1);
 
+        $list = CartService::getInstance()->list($this->userId());
+        return $this->success($list);
     }
 }

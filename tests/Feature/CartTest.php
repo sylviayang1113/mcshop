@@ -53,7 +53,7 @@ class CartTest extends TestCase
         $resp->assertJson(["errno" => 711, "errmsg" => "库存不足"]);
 
         $resp = $this->post('wx/cart/add', [
-           'goodsId' => $this->product->goods_id,
+            'goodsId' => $this->product->goods_id,
             'product_id' => $this->product->id,
             'number' => 2
         ], $this->autherHeader);
@@ -91,12 +91,73 @@ class CartTest extends TestCase
         $cart = CartService::getInstance()->getCartProduct($this->user->id,
             $this->product->goods_id, $this->product->id);
 
-        $resp = $this->post('wx/cart/add', [
+        $resp = $this->post('wx/cart/update', [
             'id' =>  $cart->id,
             'goodsId' => $this->product->goods_id,
             'productId' => $this->product->id,
             'number' => 2
         ], $this->authHeader);
         $resp->assertJson(["errno" => 0, "errmsg" => "成功"]);
+    }
+
+    public function testDelete()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->product->goods_id,
+            'productId' => $this->product->id,
+            'number' => 2
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功", "data" => "2"]);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+        $this->assertNotNull($cart);
+
+        $resp = $this->post('ex/cart/delete', [
+            'productIds' => [$this->product->id],
+            'number' => 2
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+        $this->assertNull($cart);
+
+        $resp = $this->post('wx/cart/delete', [
+            'productIds' => [],
+        ]);
+        $resp->assertJson(["errno" => 402]);
+    }
+
+    public function testChecked()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->product->goods_id,
+            'productId' => $this->product->id,
+            'number' => 2
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功", "data" => "2"]);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+
+        $this->assertTrue($cart->checked);
+
+        $resp = $this->post('wx/cart/checked', [
+            'productIds' => [$this->product->id],
+            'isChecked' => 0
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+        $this->assertFalse($cart->checked);
+
+        $resp = $this->post('wx/cart/checked', [
+            'productIds' => [$this->product->id],
+            'isChecked' => 1
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+        $this->assertFalse($cart->checked);
     }
 }

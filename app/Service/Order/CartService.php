@@ -7,6 +7,7 @@ namespace App\Service\Order;
 use App\CodeResponse;
 use App\Models\Order\Cart;
 use App\Service\BaseService;
+use Exception;
 
 class CartService extends BaseService
 {
@@ -44,8 +45,28 @@ class CartService extends BaseService
         return $cart;
     }
 
-    public function delete()
+    /**
+     * @param $userId
+     * @param $productIds
+     * @return bool|int|mixed|null
+     * @throws Exception
+     */
+    public function delete($userId, $productIds)
     {
-        
+        return Cart::query()->where('user_id', $userId)
+            ->whereIn('product_id', $productIds)
+            ->delete();
+    }
+
+    public function updateChecked($userId, $productIds, $isChecked)
+    {
+        return Cart::query()->where('user_id', $userId)
+            ->whereIn('product_id', $productIds)
+            ->update(['checked' => $isChecked]);
+    }
+
+    public function list($userId)
+    {
+        return [];
     }
 }
