@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\CodeResponse;
+use App\Exceptions\BusinessException;
 use App\Models\Order\Cart;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
@@ -60,5 +61,50 @@ class CartController extends WxController
     public function goodsCount() {
         $count = CartService::getInstance()->countCartProduct($this->userId());
         return $this->success($count);
+    }
+
+    /**
+     * @return JsonResponse
+     * @throws BusinessException
+     */
+    public function update()
+    {
+        $id = $this->verifyId('id', 0);
+        $goodsId = $this->verifyId('goodsId', 0);
+        $productId = $this->verifyId('productId', 0);
+        $number = $this->verifyPositiveInteger('number');
+        $cart = CartService::getInstance()->getCartById($this->userId(), $id);
+        if (is_null($cart)) {
+            return $this->badArgumentValue();
+        }
+
+        if ($cart->goods_id != $goodsId || $cart->product_id != $productId) {
+            return $this->badArgumentValue();
+        }
+
+        $goods = GoodsService::getInstance()->getGoods($goodsId);
+        if (is_null($goods) || $goods->is_on_sale) {
+            return $this->fail(CodeResponse::GOODS_UNSHELVE);
+        }
+
+        $product = GoodsService::getInstance()->getGoodsProductById($productId);
+        if (is_null($product) || $product->number < $number) {
+            return $this->fail(CodeResponse::GOODS_NO_STOCK);
+        }
+
+        $cart->number = $number;
+        $ret = $cart->save();
+        return $this->failOrSuccess($ret);
+    }
+
+    public function delete()
+    {
+        $productIds = $this->verifyArrayNotEmpty('productIds', []);
+
+    }
+
+    public function checked()
+    {
+
     }
 }

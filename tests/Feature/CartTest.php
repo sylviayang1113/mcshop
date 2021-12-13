@@ -78,4 +78,25 @@ class CartTest extends TestCase
         $resp->assertJson(["errno" => 711, "errmsg" => "库存不足"]);
 
     }
+
+    public function testUpdate()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->product->goods_id,
+            'productId' => $this->product->id,
+            'number' => 2
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功", "data" => "2"]);
+
+        $cart = CartService::getInstance()->getCartProduct($this->user->id,
+            $this->product->goods_id, $this->product->id);
+
+        $resp = $this->post('wx/cart/add', [
+            'id' =>  $cart->id,
+            'goodsId' => $this->product->goods_id,
+            'productId' => $this->product->id,
+            'number' => 2
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功"]);
+    }
 }

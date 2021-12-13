@@ -10,6 +10,10 @@ use App\Service\BaseService;
 
 class CartService extends BaseService
 {
+    public function getCartById($userId, $id)
+    {
+        return Cart::query()->where('user_id', $userId)->where('id', $id)->first();
+    }
     public function getCartProduct($userId, $goodsId, $productId)
     {
         return Cart::query()->where('user_id', $userId)->where('goods_id', $goodsId)
@@ -38,5 +42,10 @@ class CartService extends BaseService
         $cart->product_id = $product->id;
         $cart->save();
         return $cart;
+    }
+
+    public function delete()
+    {
+        
     }
 }
