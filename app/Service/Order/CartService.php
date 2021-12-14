@@ -5,8 +5,11 @@ namespace App\Service\Order;
 
 
 use App\CodeResponse;
+use App\Exceptions\BusinessException;
+use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Cart;
 use App\Service\BaseService;
+use App\Service\Goods\GoodsService;
 use Exception;
 
 class CartService extends BaseService
@@ -23,6 +26,83 @@ class CartService extends BaseService
 
     public function countCartProduct($userId) {
         return Cart::query()->where('user_id', $userId)->sum('number');
+    }
+
+    /**
+     * @param $goodsId
+     * @param $productId
+     * @return array
+     * @throws BusinessException
+     */
+    public function getGoodsInfo($goodsId, $productId)
+    {
+        $goods = GoodsService::getInstance()->getGoods($goodsId);
+        if (is_null($goods) || !$goods->is_on_sale) {
+            $this->throwBusinessException(CodeResponse::GOODS_UNSHELVE);
+        }
+
+        $product = GoodsService::getInstance()->getGoodsProductById($productId);
+        if (is_null($product)) {
+            $this->throwBusinessException(CodeResponse::GOODS_NO_STOCK);
+        }
+        return [$goods, $product];
+    }
+
+    /**
+     * 添加购物车
+     * @param $userId
+     * @param $goodsId
+     * @param $productId
+     * @param $number
+     * @return Cart
+     * @throws BusinessException
+     */
+    public function add($userId, $goodsId, $productId, $number)
+    {
+        list($goods, $product) = $this->getGoodsInfo($goodsId, $productId);
+        $cartProduct = $this->getCartProduct($userId, $goodsId, $productId);
+        if (is_null($cartProduct)) {
+            $this->newCart($userId, $goods, $product, $number);
+        } else {
+            $number = $cartProduct->number + $number;
+            return $this->editCart($cartProduct, $product, $number);
+        }
+    }
+
+    /**
+     * @param $userId
+     * @param $goodsId
+     * @param $productId
+     * @param $number
+     * @return Cart
+     * @throws BusinessException
+     */
+    public function fastadd($userId, $goodsId, $productId, $number)
+    {
+        list($goods, $product) = $this->getGoodsInfo($goodsId, $productId);
+        $cartProduct = $this->getCartProduct($userId, $goodsId, $productId);
+        if (is_null($cartProduct)) {
+            $this->newCart($userId, $goods, $product, $number);
+        } else {
+            return $this->editCart($cartProduct, $product, $number);
+        }
+
+    }
+
+    /**
+     * @param Cart $existCart
+     * @param GoodsProduct $product
+     * @param int $number
+     * @return Cart
+     */
+    public function editCart($existCart, $product, $num)
+    {
+        if ($num > $product->number) {
+            $this->throwBusinessException(CodeResponse::GOODS_NO_STOCK);
+        }
+        $existCart->nubmer = $num;
+        $existCart->save();
+        return $existCart;
     }
 
     public function newCart($userId, Goods $goods, GoodsProduct $product, $number)
