@@ -9,11 +9,52 @@ use App\Exceptions\BusinessException;
 use App\Models\Order\Cart;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class CartController extends WxController
 {
 
+    /**
+     * 购物车列表
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function index ()
+    {
+        $list = CartService::getInstance()->getValidCartList($this->userId());
+        $goodsCount = 0;
+        $goodsAmount = 0;
+        $checkedGoodsCount = 0;
+        $checkedGoodsAmount = 0;
+        foreach ($list as $item) {
+            $goodsCount += $item->number;
+            $amount = bcmul($item->price, $item->number, 2);
+            $goodsAmount = bcadd($goodsAmount, $amount, 2);
+            if ($item->checked) {
+                $checkedGoodsCount+= $item->number;
+                $checkedGoodsAmount = bcadd($checkedGoodsAmount, $amount, 2);
+            }
+        }
+        return $this->success(
+            [
+                'cartList' => $list->toArray(),
+                'cartTotal' => [
+                    'goodsCount' => $goodsCount,
+                    'goodsAmount' => (double) $goodsAmount,
+                    'checkedGoodsCount' => $checkedGoodsCount,
+                    'checkedGoodsAmount' => (double) $checkedGoodsAmount
+                ]
+            ]
+        );
+    }
+
+
+    /**
+     * 立即购买
+     * @return JsonResponse
+     * @throws BusinessException
+     */
     public function fastadd()
     {
         $goodsId = $this->verifyId('goodsId', 0);
@@ -80,15 +121,22 @@ class CartController extends WxController
         return $this->failOrSuccess($ret);
     }
 
+    /**
+     * @return JsonResponse
+     * @throws BusinessException
+     */
     public function delete()
     {
         $productIds = $this->verifyArrayNotEmpty('productIds', []);
         CartService::getInstance()->delete($this->userId(), $productIds);
-        $list = CartService::getInstance()->list($this->userId());
-        return $this->success($list);
+        return $this->index();
 
     }
 
+    /**
+     * @return JsonResponse
+     * @throws BusinessException
+     */
     public function checked()
     {
         $productIds = $this->verifyArrayNotEmpty('productIds', []);
@@ -98,7 +146,6 @@ class CartController extends WxController
             $productIds,
             $isChecked == 1);
 
-        $list = CartService::getInstance()->list($this->userId());
-        return $this->success($list);
+        return $this->index();
     }
 }

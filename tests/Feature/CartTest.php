@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Goods\GoodsProduct;
 use App\Models\User\User;
+use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -57,7 +58,7 @@ class CartTest extends TestCase
 
         $resp->assertJson(["errno" => 0, "errmsg" => "成功", 'data' => $cart->id]);
     }
-    
+
     public function testAdd()
     {
         $resp = $this->post('wx/cart/add', [
@@ -181,5 +182,51 @@ class CartTest extends TestCase
         $cart = CartServices::getInstance()->getCartProduct($this->user->id,
             $this->product->goods_id, $this->product->id);
         $this->assertTrue($cart->checked);
+    }
+
+    public function testIndex()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->product->goods_id,
+            'productId' => $this->product->id,
+            'number' => 2
+        ], $this->authHeader);
+
+        $resp = $this->post('wx/cart/index', [], $this->authHeader);
+        $resp->assertJson([
+            "errno" => 0, "errmsg" => "成功", "data" => [
+            'cartList' => [
+                [
+                    'goodsId' => $this->product->goods_id,
+                    'productId' => $this->product->id,
+                ]
+            ],
+            'cartTotal' => [
+                'goodsCount' => 2,
+                'goodsAmount' => 1998.00,
+                'checkedGoodsCount' => 2,
+                'checkedGoodsAmount' => 1998.00
+                ]
+            ]
+        ]);
+
+        $goods = GoodsService::getInstance()->getGoods($this->product->goods_id);
+        $goods->is_on_sale = false;
+        $goods->save();
+
+        $resp = $this->post('wx/cart/index', [], $this->authHeader);
+        $resp->assertJson([
+            "errno" => 0, "errmsg" => "成功", "data" => [
+                'cartList' => [
+                    []
+                ],
+                'cartTotal' => [
+                    'goodsCount' => 0,
+                    'goodsAmount' => 0,
+                    'checkedGoodsCount' => 0,
+                    'checkedGoodsAmount' => 0
+                ]
+            ]
+        ]);
     }
 }

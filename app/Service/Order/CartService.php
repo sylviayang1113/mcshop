@@ -14,6 +14,47 @@ use Exception;
 
 class CartService extends BaseService
 {
+
+    public function getCartList($userId)
+    {
+        return Cart::query()->where('user_id', $userId)->get();
+    }
+
+    public function getValidCartList($userId)
+    {
+        $list = $this->getCartList($userId);
+        $goodsIds = $list->pluck('goods_id')->toArray();
+        $goodsList = GoodsService::getInstance()->getGoodsListByIds($goodsIds)->keyBy('id');
+        $invalidCartIds = [];
+        $list->filter(function (Cart $cart) use ($goodsList, &$invalidCartIds) {
+            /**
+             * @var $goods
+             */
+            $goods = $goodsList->get($cart->goods_id);
+            $isValid = !empty($goods) && $goods->is_on_sale;
+            if (!$isValid) {
+                $invalidCartIds[] = $cart->id;
+            }
+            return $isValid;
+        });
+        $this->deleteCartList($invalidCartIds);
+        return $list;
+    }
+
+    /**
+     * @param $ids
+     * @return bool|int|mixed|null
+     * @throws Exception
+     */
+    public function deleteCartList($ids)
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return Cart::query()->whereIn('id', $ids)->delete();
+    }
+
     public function getCartById($userId, $id)
     {
         return Cart::query()->where('user_id', $userId)->where('id', $id)->first();
@@ -144,9 +185,5 @@ class CartService extends BaseService
             ->whereIn('product_id', $productIds)
             ->update(['checked' => $isChecked]);
     }
-
-    public function list($userId)
-    {
-        return [];
-    }
+    
 }
