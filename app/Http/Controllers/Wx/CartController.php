@@ -167,5 +167,18 @@ class CartController extends WxController
                 return $this->badArgumentValue();
             }
         }
+
+        // 获取购物车的商品列表
+        if (empty($cartId)) {
+            $checkedGoodsList = CartService::getInstance()->getCheckedCartList($this->userId());
+        } else {
+            $cart = CartService::getInstance()->getCartById($this->userId(), $cartId);
+            if (empty($cart)) {
+                return $this->badArgumentValue();
+            }
+            $checkedGoodsList = collect([$cart]);
+        }
+
+        
     }
 }

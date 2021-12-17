@@ -20,6 +20,12 @@ class CartService extends BaseService
         return Cart::query()->where('user_id', $userId)->get();
     }
 
+    public function getCheckedCartList($userId)
+    {
+        return Cart::query()->where('user_id', $userId)
+            ->where('checked', 1)->get();
+    }
+
     public function getValidCartList($userId)
     {
         $list = $this->getCartList($userId);
