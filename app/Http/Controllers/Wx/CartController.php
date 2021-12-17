@@ -9,6 +9,7 @@ use App\Exceptions\BusinessException;
 use App\Models\Order\Cart;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
+use App\Service\User\AddressService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
@@ -147,5 +148,24 @@ class CartController extends WxController
             $isChecked == 1);
 
         return $this->index();
+    }
+
+    public function checkout()
+    {
+        $cartId = $this->verifyInteger('cartId');
+        $addressId = $this->verifyInteger('addressId');
+        $couponId = $this->verifyInteger('couponId');
+        $userCouponId = $this->verifyInteger('userCouponId');
+        $grouponRulesId = $this->verifyInteger('grouponRulesId');
+
+        // 获取地址
+        if (empty($addressId)) {
+            AddressService::getInstance()->getDefaultAddress($this->userId());
+        } else {
+            $address = AddressService::getInstance()->getAddress($this->userId(), $addressId);
+            if (empty($address)) {
+                return $this->badArgumentValue();
+            }
+        }
     }
 }

@@ -1,16 +1,27 @@
 <?php
 
 
-namespace App\Service\User;
-
+namespace App\Services\User;
 
 use App\CodeResponse;
 use App\Exceptions\BusinessException;
-use App\Models\Address;
-use Ramsey\Collection\Collection;
+use App\Inputs\AddressInput;
+use App\Models\User\Address;
+use App\Services\BaseServices;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class AddressService extends BaseService
 {
+
+    public function getDefaultAddress($userId)
+    {
+        return Address::query()->where('user_id', $userId)
+            ->where('is_default', 1)->first();
+    }
+
     /**
      * 获取地址列表
      * @param int $userId

@@ -185,5 +185,5 @@ class CartService extends BaseService
             ->whereIn('product_id', $productIds)
             ->update(['checked' => $isChecked]);
     }
-    
+
 }
