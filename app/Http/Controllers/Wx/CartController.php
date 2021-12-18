@@ -9,6 +9,7 @@ use App\Exceptions\BusinessException;
 use App\Models\Order\Cart;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
+use App\Service\Promotion\GrouponService;
 use App\Service\User\AddressService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -179,6 +180,21 @@ class CartController extends WxController
             $checkedGoodsList = collect([$cart]);
         }
 
-        
+        // 计算订单总金额
+        $grouponRules = GrouponService::getInstance()->getGrouponRulesById($grouponRulesId);
+        $checkedGoodsPrice = 0;
+        $grouponPrice = 0;
+        foreach ($checkedGoodsList as $cart) {
+            if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
+                $grouponPrice  = bcmul($grouponRules->discount, $cart->number, 2);
+                $price = bcsub($cart->price, $grouponRules->discount, 2);
+            } else {
+                $price = $cart->price;
+            }
+            $price = bcmul($price, $cart->number);
+            $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price);
+        }
+
+
     }
 }
