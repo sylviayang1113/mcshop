@@ -6,6 +6,8 @@ namespace App\Service\Promotion;
 
 use App\CodeResponse;
 use App\Constant;
+use App\Enums\CouponEnums;
+use App\Enums\CouponUserEnums;
 use App\Exceptions\BusinessException;
 use App\Inputs\PageInput;
 use App\Models\Promotion\Coupon;
@@ -16,6 +18,12 @@ use PhpParser\Builder;
 
 class CouponService extends BaseService
 {
+    public function getUsableCoupons($userId)
+    {
+        return CouponUser::query()->where('user_id', $userId)
+            ->where('status', CouponUserEnums::STATUS_USABLE)
+            ->get();
+    }
     public function getCoupon($id, $columns = ['*'])
     {
         return Coupon::query()->find($id, $columns);
@@ -115,6 +123,53 @@ class CouponService extends BaseService
             'end_time' => $endTime
         ]);
         return $couponId->save();
+    }
+
+    /**
+     * 验证当前价格是否可以使用这张优惠券
+     * @param Coupon $coupon
+     * @param CouponUser $couponUser
+     * @param double $price
+     */
+    public function checkCouponAndPrice($coupon, $couponUser, $price)
+    {
+        if (empty($couponUser)) {
+            return false;
+        }
+        if (empty($coupon)) {
+            return false;
+        }
+        if ($couponUser->coupon_id != $coupon->id) {
+            return false;
+        }
+        if ($coupon->status != CouponEnums::STATUS_NORMAL) {
+            return false;
+        }
+        if ($coupon->goods_type != CouponEnums::GOODS_TYPE_ALL) {
+            return false;
+        }
+        if (bccomp($coupon->min, $price) == 1) {
+            return false;
+        }
+        $now = now();
+        switch ($coupon->time_type) {
+            case CouponEnums::TIME_TYPE_TIME:
+                $start = Carbon::parse($coupon->start_time);
+                $end = Carbon::parse($coupon->end_time);
+                if ($now->isBefore($start) ||$now->isAfter($end)) {
+                    return false;
+                }
+                break;
+            case CouponEnums::TIME_TYPE_DAYS:
+                $expired = Carbon::parse($couponUser->add_time)->addDays($coupon->days);
+                if ($now->isAfter($expired)) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
     }
 
 }

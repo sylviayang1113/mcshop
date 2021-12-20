@@ -7,8 +7,10 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Models\Order\Cart;
+use App\Models\Promotion\CouponUser;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
+use App\Service\Promotion\CouponService;
 use App\Service\Promotion\GrouponService;
 use App\Service\User\AddressService;
 use Exception;
@@ -195,6 +197,18 @@ class CartController extends WxController
             $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price);
         }
 
+        // 获取适合当前价格的优惠券列表, 并根据优惠折扣进行降序排序
+        $couponUsers = CouponService::getInstance()->getUsableCoupons($this->userId());
+        $couponIds = $couponUsers->pluck('coupon_id')->toArray();
+        $coupons = CouponService::getInstance()->getCoupons($couponIds)->keyBy('id');
+        $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
+            /**@var Coupon $coupon */
+            $coupon = $coupons->get($couponUser->coupon_id);
+            return CouponService::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
+        })->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
+            $coupon = $coupons->get($couponUser->coupon_id);
+            return $coupon->discount;
+        });
 
     }
 }
