@@ -24,6 +24,12 @@ class CouponService extends BaseService
             ->where('status', CouponUserEnums::STATUS_USABLE)
             ->get();
     }
+
+    public function getCouponUser($id, $columns = ['*'])
+    {
+        return CouponUser::query()->find($id, $columns);
+    }
+
     public function getCoupon($id, $columns = ['*'])
     {
         return Coupon::query()->find($id, $columns);

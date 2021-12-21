@@ -210,5 +210,22 @@ class CartController extends WxController
             return $coupon->discount;
         });
 
+        $couponPrice = 0;
+        if (is_null ($couponId) || $couponId == -1) {
+            $userId = -1;
+        } else if ($couponId == 0) {
+            /** @var  CouponUser $couponUser */
+            $couponUser = $couponUsers->first();
+            $couponId = $couponUser->coupon_id ?? 0;
+            $userCouponId = $couponUser->id ?? 0;
+            $couponPrice = CouponService::getInstance()->getCoupon($couponId)->discount ?? 0;
+        } else {
+            $coupon = CouponService::getInstance()->getCoupon($couponId);
+            $couponUser = CouponService::getInstance()->getCouponUser($userCouponId);
+            $is = CouponService::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
+            if ($is) {
+                $couponPrice = $coupon->discount ?? 0;
+            }
+        }
     }
 }
