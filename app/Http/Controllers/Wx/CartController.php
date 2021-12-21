@@ -12,6 +12,7 @@ use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
 use App\Service\Promotion\CouponService;
 use App\Service\Promotion\GrouponService;
+use App\Service\SystemService;
 use App\Service\User\AddressService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -153,6 +154,12 @@ class CartController extends WxController
         return $this->index();
     }
 
+    /**
+     * 下单前信息确认
+     * @return JsonResponse
+     * @throws BusinessException
+     * @throws Exception
+     */
     public function checkout()
     {
         $cartId = $this->verifyInteger('cartId');
@@ -229,6 +236,31 @@ class CartController extends WxController
         }
 
         // 运费
-        
+        $freightPrice = 0;
+        $minFreightMin = SystemService::getInstance()->getFreightMin();
+        if (bccomp($minFreightMin, $checkedGoodsPrice) == 1) {
+            $freightPrice = SystemService::getInstance()->getFreightValue();
+        }
+
+        // 计算订单金额
+        $orderPrice = bcadd($checkedGoodsPrice, $freightPrice, 2);
+        $orderPrice = bcsub($orderPrice, $couponPrice);
+
+        return $this->success([
+            "addressId" => $addressId,
+            "couponId" => $couponId,
+            "userCouponId" => $userCouponId,
+            "cartId" => $cartId,
+            "grouponRulesId" => $grouponRulesId,
+            "grouponPrice" => $grouponPrice,
+            "checkedAddress" => $address,
+            "availableCouponLength" => $availableCouponLength,
+            "goodsTotalPrice" => $checkedGoodsPrice,
+            "freightPrice" => $freightPrice,
+            "couponPrice" => $couponPrice,
+            "orderTotalPrice" => $orderPrice,
+            "actualPrice" => $orderPrice,
+            "checkedGoodsList" => $checkedGoodsList->toArray(),
+        ]);
     }
 }
