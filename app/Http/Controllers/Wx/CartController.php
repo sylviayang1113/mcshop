@@ -170,7 +170,8 @@ class CartController extends WxController
 
         // 获取地址
         if (empty($addressId)) {
-            AddressService::getInstance()->getDefaultAddress($this->userId());
+            $address = AddressService::getInstance()->getDefaultAddress($this->userId());
+            $addressId = $address->id ?? 0;
         } else {
             $address = AddressService::getInstance()->getAddress($this->userId(), $addressId);
             if (empty($address)) {
@@ -200,8 +201,8 @@ class CartController extends WxController
             } else {
                 $price = $cart->price;
             }
-            $price = bcmul($price, $cart->number);
-            $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price);
+            $price = bcmul($price, $cart->number, 2);
+            $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
         }
 
         // 获取适合当前价格的优惠券列表, 并根据优惠折扣进行降序排序
@@ -219,7 +220,8 @@ class CartController extends WxController
 
         $couponPrice = 0;
         if (is_null ($couponId) || $couponId == -1) {
-            $userId = -1;
+            $couponId = -1;
+            $userCouponId = -1;
         } else if ($couponId == 0) {
             /** @var  CouponUser $couponUser */
             $couponUser = $couponUsers->first();
@@ -244,7 +246,7 @@ class CartController extends WxController
 
         // 计算订单金额
         $orderPrice = bcadd($checkedGoodsPrice, $freightPrice, 2);
-        $orderPrice = bcsub($orderPrice, $couponPrice);
+        $orderPrice = bcsub($orderPrice, $couponPrice, 2);
 
         return $this->success([
             "addressId" => $addressId,
@@ -254,7 +256,7 @@ class CartController extends WxController
             "grouponRulesId" => $grouponRulesId,
             "grouponPrice" => $grouponPrice,
             "checkedAddress" => $address,
-            "availableCouponLength" => $availableCouponLength,
+            "availableCouponLength" => $couponUsers->count(),
             "goodsTotalPrice" => $checkedGoodsPrice,
             "freightPrice" => $freightPrice,
             "couponPrice" => $couponPrice,

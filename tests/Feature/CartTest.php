@@ -229,4 +229,9 @@ class CartTest extends TestCase
             ]
         ]);
     }
+
+    public function testCheckout()
+    {
+        $resp = $this->assertLitemallApi('wx/cart/checkout');
+    }
 }
