@@ -4,6 +4,7 @@
 namespace App\Service;
 
 
+use App\CodeResponse;
 use App\Exceptions\BusinessException;
 
 class BaseService
@@ -36,6 +37,11 @@ class BaseService
     public function throwBusinessException(array $codeResponce, $info = '')
     {
         throw new BusinessException($codeResponce, $info);
+    }
+
+    public function throwBadArgumentValue()
+    {
+        $this->throwBusinessException(CodeResponse::PARAM_VALUE_ILLEGAL);
     }
 
 }

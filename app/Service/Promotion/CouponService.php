@@ -178,4 +178,46 @@ class CouponService extends BaseService
         return true;
     }
 
+    public function getMeetPriceCouponAndSort($userId, $price)
+    {
+        $couponUsers = CouponService::getInstance()->getUsableCoupons($userId);
+        $couponIds = $couponUsers->pluck('coupon_id')->toArray();
+        $coupons = CouponService::getInstance()->getCoupons($couponIds)->keyBy('id');
+        return $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $price) {
+            /**@var Coupon $coupon */
+            $coupon = $coupons->get($couponUser->coupon_id);
+            return CouponService::getInstance()->checkCouponAndPrice($coupon, $couponUser, $price);
+        })->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
+            $coupon = $coupons->get($couponUser->coupon_id);
+            return $coupon->discount;
+        });
+    }
+
+    public function getCouponUserByCouponId($userId, $couponId)
+    {
+        return CouponUser::query()->where('user_id', $userId)->Where('coupon_id', $couponId)
+            ->orderBy('id')->first();
+    }
+
+    public function getMostMeetPriceCoupon($userId, $couponId, $price, &$availableCouponLength = 0)
+    {
+        $couponUsers = $this->getMeetPriceCouponAndSort($userId, $price);
+        $availableCouponLength = $couponUsers->count();
+
+        if (is_null ($couponId) || $couponId == -1) {
+            return null;
+        }
+
+        if (!empty($couponId)) {
+            $coupon = $this->getCoupon($couponId);
+            $couponUser = $this->getCouponUserByCouponId($userId, $couponId);
+            $is = $this->checkCouponAndPrice($coupon, $couponUser, $price);
+            if ($is) {
+                return $couponUser;
+            }
+        }
+
+        return $couponUsers->first();
+    }
+
 }

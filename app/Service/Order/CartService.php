@@ -10,7 +10,9 @@ use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Cart;
 use App\Service\BaseService;
 use App\Service\Goods\GoodsService;
+use App\Service\Promotion\GrouponService;
 use Exception;
+use Illuminate\Support\Collection;
 
 class CartService extends BaseService
 {
@@ -20,11 +22,49 @@ class CartService extends BaseService
         return Cart::query()->where('user_id', $userId)->get();
     }
 
-    public function getCheckedCartList($userId)
+    public function getCheckedCart($userId)
     {
         return Cart::query()->where('user_id', $userId)
             ->where('checked', 1)->get();
     }
+
+    /**
+     * 获取一选择的购物车商品列表
+     * @param $userId
+     * @param $cartId
+     * @return Collection|mixed
+     */
+    public function getCheckedCartList($userId, $cartId = null)
+    {
+        if (empty($cartId)) {
+            $checkedGoodsList = $this->getCheckedCartList($userId);
+        } else {
+            $cart = $this->getCartById($userId, $cartId);
+            if (empty($cart)) {
+                $this->throwBadArgumentValue();
+            }
+            $checkedGoodsList = collect([$cart]);
+        }
+        return $checkedGoodsList;
+    }
+
+    public function getCartPriceCutGroupon($checkedGoodsList, $grouponRulesId, &$grouponPrice = 0)
+    {
+        $grouponRules = GrouponService::getInstance()->getGrouponRulesById($grouponRulesId);
+        $checkedGoodsPrice = 0;
+        foreach ($checkedGoodsList as $cart) {
+            if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
+                $grouponPrice  = bcmul($grouponRules->discount, $cart->number, 2);
+                $price = bcsub($cart->price, $grouponRules->discount, 2);
+            } else {
+                $price = $cart->price;
+            }
+            $price = bcmul($price, $cart->number, 2);
+            $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
+        }
+        return $checkedGoodsPrice;
+    }
+
 
     public function getValidCartList($userId)
     {

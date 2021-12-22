@@ -165,76 +165,30 @@ class CartController extends WxController
         $cartId = $this->verifyInteger('cartId');
         $addressId = $this->verifyInteger('addressId');
         $couponId = $this->verifyInteger('couponId');
-        $userCouponId = $this->verifyInteger('userCouponId');
         $grouponRulesId = $this->verifyInteger('grouponRulesId');
 
         // 获取地址
-        if (empty($addressId)) {
-            $address = AddressService::getInstance()->getDefaultAddress($this->userId());
-            $addressId = $address->id ?? 0;
-        } else {
-            $address = AddressService::getInstance()->getAddress($this->userId(), $addressId);
-            if (empty($address)) {
-                return $this->badArgumentValue();
-            }
-        }
+        $address = AddressService::getInstance()->getAddressOrDefault($this->userId(), $addressId);
+        $addressId = $address->id ?? 0;
 
         // 获取购物车的商品列表
-        if (empty($cartId)) {
-            $checkedGoodsList = CartService::getInstance()->getCheckedCartList($this->userId());
-        } else {
-            $cart = CartService::getInstance()->getCartById($this->userId(), $cartId);
-            if (empty($cart)) {
-                return $this->badArgumentValue();
-            }
-            $checkedGoodsList = collect([$cart]);
-        }
+        $checkedGoodsList = CartService::getInstance()->getCheckedCartList($this->userId(), $cartId);
 
         // 计算订单总金额
-        $grouponRules = GrouponService::getInstance()->getGrouponRulesById($grouponRulesId);
-        $checkedGoodsPrice = 0;
         $grouponPrice = 0;
-        foreach ($checkedGoodsList as $cart) {
-            if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
-                $grouponPrice  = bcmul($grouponRules->discount, $cart->number, 2);
-                $price = bcsub($cart->price, $grouponRules->discount, 2);
-            } else {
-                $price = $cart->price;
-            }
-            $price = bcmul($price, $cart->number, 2);
-            $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
-        }
+        $checkedGoodsPrice = CartService::getInstance()->getCartPriceCutGroupon($checkedGoodsList, $grouponRulesId, $grouponPrice);
 
-        // 获取适合当前价格的优惠券列表, 并根据优惠折扣进行降序排序
-        $couponUsers = CouponService::getInstance()->getUsableCoupons($this->userId());
-        $couponIds = $couponUsers->pluck('coupon_id')->toArray();
-        $coupons = CouponService::getInstance()->getCoupons($couponIds)->keyBy('id');
-        $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
-            /**@var Coupon $coupon */
-            $coupon = $coupons->get($couponUser->coupon_id);
-            return CouponService::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
-        })->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
-            $coupon = $coupons->get($couponUser->coupon_id);
-            return $coupon->discount;
-        });
-
-        $couponPrice = 0;
-        if (is_null ($couponId) || $couponId == -1) {
+        // 获取优惠券信息
+        $availableCouponLength = 0;
+        $couponUser = CouponService::getInstance()->getMostMeetPriceCoupon($this->userId(), $couponId, $checkedGoodsPrice, $availableCouponLength);
+        if (is_null($couponUser)) {
             $couponId = -1;
             $userCouponId = -1;
-        } else if ($couponId == 0) {
-            /** @var  CouponUser $couponUser */
-            $couponUser = $couponUsers->first();
+            $couponPrice = 0;
+        } else {
             $couponId = $couponUser->coupon_id ?? 0;
             $userCouponId = $couponUser->id ?? 0;
             $couponPrice = CouponService::getInstance()->getCoupon($couponId)->discount ?? 0;
-        } else {
-            $coupon = CouponService::getInstance()->getCoupon($couponId);
-            $couponUser = CouponService::getInstance()->getCouponUser($userCouponId);
-            $is = CouponService::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
-            if ($is) {
-                $couponPrice = $coupon->discount ?? 0;
-            }
         }
 
         // 运费
@@ -256,7 +210,7 @@ class CartController extends WxController
             "grouponRulesId" => $grouponRulesId,
             "grouponPrice" => $grouponPrice,
             "checkedAddress" => $address,
-            "availableCouponLength" => $couponUsers->count(),
+            "availableCouponLength" => $availableCouponLength,
             "goodsTotalPrice" => $checkedGoodsPrice,
             "freightPrice" => $freightPrice,
             "couponPrice" => $couponPrice,

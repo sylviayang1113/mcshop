@@ -7,9 +7,8 @@ use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Inputs\AddressInput;
 use App\Models\User\Address;
+use App\Service\BaseService;
 use App\Services\BaseServices;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +19,26 @@ class AddressService extends BaseService
     {
         return Address::query()->where('user_id', $userId)
             ->where('is_default', 1)->first();
+    }
+
+    /**
+     * 获取地址过着返回默认地址
+     * @param $userId
+     * @param null $addressId
+     * @return mixed
+     */
+    public function getAddressOrDefault($userId, $addressId = null)
+    {
+        // 获取地址
+        if (empty($addressId)) {
+            $address = AddressService::getInstance()->getDefaultAddress($userId);
+        } else {
+            $address = AddressService::getInstance()->getAddress($userId, $addressId);
+            if (empty($address)) {
+                $this->throwBadArgumentValue();
+            }
+        }
+        return $address;
     }
 
     /**
