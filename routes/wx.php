@@ -63,3 +63,19 @@ Route::post('cart/checked', 'CartController@checked'); // 选择或取消选择�
 Route::post('cart/fastadd', 'CartController@fastadd'); // 立即购买商品
 Route::get('cart/index', 'CartController@index'); //获取购物车的数据
 Route::get('cart/checkout', 'CartController@checkout'); // 下单前信息确认
+
+# 订单模块-订单
+Route::post('order/submit', 'OrderController@submit'); // 提交订单
+Route::post('order/cancel', 'OrderController@cancel'); //取消订单
+Route::post('order/refund', 'OrderController@refund'); //退款取消订单
+Route::post('order/delete', 'OrderController@delete'); //删除订单
+Route::post('order/confirm', 'OrderController@confirm'); //确认收货
+//Route::any('order/prepay', ''); // 订单的预支付会话 - jsapi
+Route::post('order/h5pay', 'OrderController@h5pay'); // 微信支付 - h5
+Route::post('order/wxNotify', 'OrderController@wxNotify'); // 微信支付回调
+Route::post('order/h5alipay', 'OrderController@h5alipay'); // 支付宝支付 - h5
+Route::post('order/alipayNotify', 'OrderController@alipayNotify'); // 支付宝支付回调
+Route::get('order/alipayReturn', 'OrderController@alipayReturn'); // 支付宝支付回调
+Route::any('order/list', 'OrderController@list'); //订单列表
+Route::get('order/detail', 'OrderController@detail'); //订单详情
+Route::get('order/detail', [OrderController::class, 'detail']); //订单详情

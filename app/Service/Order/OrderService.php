@@ -22,6 +22,7 @@ class OrderService extends BaseService
      * 提交订单
      * @param $userId
      * @param OrderSubmitInput $input
+     * @return Order|void
      * @throws BusinessException
      */
     public function submit($userId, OrderSubmitInput $input)
@@ -71,6 +72,7 @@ class OrderService extends BaseService
         $order->message = $input->message;
         $order->goods_price = $checkedGoodsPrice;
         $order->freight_price = $freightPrice;
+        $order->integral_price = 0;
         $order->coupon_price = $couponPrice;
         $order->order_price = $orderTotalPrice;
         $order->actual_price = $orderTotalPrice;
@@ -91,6 +93,8 @@ class OrderService extends BaseService
             $input->grouponLinkId);
 
         // TODO 设置超时任务
+
+        return $order;
     }
 
     public function reduceProductStock($goodsList)
