@@ -10,6 +10,7 @@ use App\Models\Order\Cart;
 use App\Models\Promotion\CouponUser;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\CartService;
+use App\Service\Order\OrderService;
 use App\Service\Promotion\CouponService;
 use App\Service\Promotion\GrouponService;
 use App\Service\SystemService;
@@ -192,11 +193,7 @@ class CartController extends WxController
         }
 
         // 运费
-        $freightPrice = 0;
-        $minFreightMin = SystemService::getInstance()->getFreightMin();
-        if (bccomp($minFreightMin, $checkedGoodsPrice) == 1) {
-            $freightPrice = SystemService::getInstance()->getFreightValue();
-        }
+        $freightPrice = OrderService::getInstance()->getFreight($checkedGoodsPrice);
 
         // 计算订单金额
         $orderPrice = bcadd($checkedGoodsPrice, $freightPrice, 2);

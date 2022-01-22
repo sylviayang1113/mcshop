@@ -66,7 +66,7 @@ class GrouponService extends BaseService
      * @param null $linkId
      * @throws BusinessException
      */
-    public function checkoutGrouponValid($userId, $ruleId, $linkId = null)
+    public function checkGrouponValid($userId, $ruleId, $linkId = null)
     {
         if ($ruleId == null || $ruleId <= 0) {
             return;

@@ -232,4 +232,12 @@ class CartService extends BaseService
             ->update(['checked' => $isChecked]);
     }
 
+    public function clearCartGoods($userId, $cartId = null)
+    {
+        if (empty($cartId)) {
+            return Cart::query()->where('user_id', $userId)->where('checked', 1)->delete();
+        }
+        return Cart::query()->where('user_id', $userId)->where('id', $cartId)->delete();
+    }
+
 }
