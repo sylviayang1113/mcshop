@@ -53,6 +53,14 @@ class GoodsService extends BaseService
         return GoodsProduct::query()->find($id);
     }
 
+    public function getGoodsProductsByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return collect();
+        }
+        return GoodsProduct::query()->whereIn('id', $ids)->get();
+    }
+
     public function getGoodsIssue(int $page = 1, int $limit = 4)
     {
         return Issue::query()->forPage($page, $limit)->get();
@@ -117,4 +125,9 @@ class GoodsService extends BaseService
         return $query;
     }
 
+    public function reduceStock($product_id, $number)
+    {
+        return GoodsProduct::query()->where('id', $product_id)->where('number', '>=', $number)
+            ->decrement('number', $number);
+    }
 }

@@ -8,13 +8,17 @@ use App\CodeResponse;
 use App\Enums\OrderEnums;
 use App\Exceptions\BusinessException;
 use App\Inputs\OrderSubmitInput;
+use App\Models\Collect;
+use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Order;
 use App\Service\BaseService;
+use App\Service\Goods\GoodsService;
 use App\Service\Promotion\CouponService;
 use App\Service\Promotion\GrouponService;
 use App\Service\SystemService;
 use App\Services\User\AddressService;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection;
 
 class OrderService extends BaseService
 {
@@ -97,9 +101,29 @@ class OrderService extends BaseService
         return $order;
     }
 
-    public function reduceProductStock($goodsList)
+    /**
+     * 减库存
+     * @param  Cart[]|Collection  $goodsList
+     * @throws BusinessException
+     */
+    public function reduceProductsStock($goodsList)
     {
-        // TODO
+        $productIds = $goodsList->pluck('produc_id')->toArray();
+        $products = GoodsService::getInstance()->getGoodsProductsByIds($productIds)->keyBy('id');
+        foreach ($goodsList as $cart) {
+            /** @var GoodsProduct $product */
+            $product = $products->get($cart->product_id);
+            if (empty($product)) {
+                $this->throwBadArgumentValue();
+            }
+            if ($product->number < $cart->number) {
+                $this->throwBusinessException(CodeResponse::GOODS_NO_STOCK);
+            }
+            $row = GoodsService::getInstance()->reduceStock($product->id, $cart->number);
+            if ($row == 0) {
+                $this->throwBusinessException(CodeResponse::GOODS_NO_STOCK);
+            }
+        }
     }
 
     /**
