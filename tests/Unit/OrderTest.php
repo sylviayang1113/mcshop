@@ -14,6 +14,26 @@ class OrderTest extends TestCase
 {
     use DatabaseTransactions;
 
+    public function testReduceStock()
+    {
+        /** @var GoodsProduct $product1 */
+        $product1 = GoodsProduct::factory()->create(['price' => 11.3]);
+        /** @var GoodsProduct $product2 */
+        $product2 = GoodsProduct::factory()->groupon()->create(['price' => 20.56]);
+        /** @var GoodsProduct $product3 */
+        $product3 = GoodsProduct::factory()->create(['price' => 10.6]);
+        CartServices::getInstance()->add($this->user->id, $product1->goods_id, $product1->id, 2);
+        CartServices::getInstance()->add($this->user->id, $product2->goods_id, $product2->id, 5);
+        CartServices::getInstance()->add($this->user->id, $product3->goods_id, $product3->id, 3);
+        CartServices::getInstance()->updateChecked($this->user->id, [$product1->id], false);
+        // 19.56*5+10.6*3=129.6
+        $checkedGoodsList = CartServices::getInstance()->getCheckedCartList($this->user->id);
+        OrderService::getInstance()->reduceProductsStock($checkedGoodsList);
+
+        $this->assertEquals($product2->number - 5, $product2->refresh()->number);
+        $this->assertEquals($product3->number - 3, $product3->refresh()->number);
+    }
+
     public function testSubmit()
     {
         $this->user = User::factory()->AddressDefault()->create();
