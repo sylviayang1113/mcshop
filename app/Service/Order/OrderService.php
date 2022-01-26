@@ -8,6 +8,7 @@ use App\CodeResponse;
 use App\Enums\OrderEnums;
 use App\Exceptions\BusinessException;
 use App\Inputs\OrderSubmitInput;
+use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Collect;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Order;
@@ -96,7 +97,8 @@ class OrderService extends BaseService
         GrouponService::getInstance()->openOrJoinGroupon($userId, $order->id, $input->grouponRulesId,
             $input->grouponLinkId);
 
-        // TODO 设置超时任务
+        // 设置超时任务
+        dispatch(new OrderUnpaidTimeEndJob($userId, $order->id));
 
         return $order;
     }
@@ -183,5 +185,10 @@ class OrderService extends BaseService
             $freightPrice = SystemService::getInstance()->getFreightValue();
         }
         return $freightPrice;
+    }
+
+    public function cancel($userId, $orderId)
+    {
+        return;
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Unit;
 
 
 use App\Inputs\OrderSubmitInput;
+use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Order\OrderGoods;
 use App\Service\Order\OrderService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -79,6 +80,11 @@ class OrderTest extends TestCase
 
         $productIds = CartServices::getInstance()->getCartList($this->user->id)->pluck('product_id')->toArray();
         $this->assertEquals([$product1->id], $productIds);
+    }
+
+    public function testJob()
+    {
+        dispatch(new OrderUnpaidTimeEndJob(1, 2));
     }
 
 }
