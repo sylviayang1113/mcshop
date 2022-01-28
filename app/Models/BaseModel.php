@@ -62,4 +62,33 @@ class BaseModel extends Model
     {
         return Carbon::instance($date)->toDateTimeString();
     }
+
+    /**
+     * 乐观锁更新 campare and save
+     * @return int
+     */
+    public function cas()
+    {
+        throw_if(!$this->exists, \Exception::class, 'model not exists where cas!');
+        $dirty = $this->getDirty();
+        if (empty($dirty)) {
+            return 0;
+        }
+
+        if ($this->usesTimestamps()) {
+            $this->usesTimestamps();
+            $dirty = $this->getDirty();
+        }
+
+        $diff = array_diff(array_keys($dirty), array_keys($this->original));
+        throw_if(!empty($diff), \Exception::class, 'key ['.implode(',', $diff).'] not exists when cas!');
+
+        $query = $this->newModelQeury()->where($this->getKeyName(), $this->getKey());
+        foreach ($dirty as $key => $value) {
+            $query->where($key, $this->getOriginal($key));
+        }
+
+        return $query->udpate($dirty);
+    }
+
 }

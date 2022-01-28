@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Inputs\OrderSubmitInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Order\OrderGoods;
+use App\Models\User\User;
 use App\Service\Goods\GoodsService;
 use App\Service\Order\OrderService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -131,5 +132,13 @@ class OrderTest extends TestCase
         $productIds = $goodsList->pluck('product_id')->toArray();
         $products = GoodsService::getInstance()->getGoodsProductsByIds($productIds);
         $this->assertEquals([100, 100], $products)->pluck('number')->toArray();
+    }
+
+    public function testCas()
+    {
+        $user = User::first(['id', 'nickname', 'mobile', 'update_time']);
+        $user->nickname = 'test';
+        $user->mobile = '15000000000';
+        $ret = $user->cas();
     }
 }

@@ -43,22 +43,4 @@ class BaseService
     {
         $this->throwBusinessException(CodeResponse::PARAM_VALUE_ILLEGAL);
     }
-
-    /**
-     * 乐观锁更新
-     * @return int
-     */
-    public function cas()
-    {
-        $dirty = $this->getDirty();
-        $updatedAt = $this->getUpdatedAtColumn();
-        $query = self::query()->where($this->getKeyName(), $this->getKey())
-            ->where($updatedAt, $this->{$updatedAt});
-        foreach ($dirty as $key => $value) {
-            $query->where($key, $this->getOriginal($key));
-        }
-
-        return $query->udpate($dirty);
-    }
-
 }
