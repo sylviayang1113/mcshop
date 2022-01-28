@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\BusinessException;
 use App\Service\Order\OrderService;
 use App\Service\SystemService;
 use Illuminate\Bus\Queueable;
@@ -37,6 +38,9 @@ class OrderUnpaidTimeEndJob implements ShouldQueue
      */
     public function handle()
     {
-        OrderService::getInstance()->cancel($this->userId, $this->orderId);
+        try {
+            OrderService::getInstance()->systemCancel($this->userId, $this->orderId);
+        } catch (BusinessException $exception) {
+        }
     }
 }

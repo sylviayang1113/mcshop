@@ -9,9 +9,9 @@ use App\Enums\OrderEnums;
 use App\Exceptions\BusinessException;
 use App\Inputs\OrderSubmitInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
-use App\Models\Collect;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Order;
+use App\Models\Order\OrderGoods;
 use App\Service\BaseService;
 use App\Service\Goods\GoodsService;
 use App\Service\Promotion\CouponService;
@@ -187,8 +187,90 @@ class OrderService extends BaseService
         return $freightPrice;
     }
 
-    public function cancel($userId, $orderId)
+    public function getOrderByUserIdAndId($userId, $orderId)
     {
-        return;
+        return Order::query()->where('user_id', $userId)->find($orderId);
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     */
+    public function userCancel($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancel($userId, $orderId, 'user');
+        });
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     */
+    public function systemCancel($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancel($userId, $orderId, 'system');
+        });
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     */
+    public function adminCancel($userId, $orderId)
+    {
+        $this->cancel($userId, $orderId, 'admin');
+    }
+
+    public function getOrderGoodsList($orderId)
+    {
+        return OrderGoods::query()->where('order_id', $orderId)->get();
+    }
+
+    /**
+     * 订单取消
+     * @param $userId
+     * @param $orderId
+     * @param string $role 支持： user/admin/system
+     * @return bool
+     * @throws BusinessException
+     */
+    private function cancel($userId, $orderId, $role = 'user')
+    {
+        $order = $this->getOrderByUserIdAndId($orderId, $orderId);
+        if (is_null($order)) {
+            $this->throwBadArgumentValue();
+        }
+
+        if (!$order->canCancelHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '订单不能取消');
+        }
+
+        switch ($role) {
+            case 'system':
+                $order->order_status = OrderEnums::STATUS_AUTO_CANCEL;
+                break;
+            case 'admin':
+                $order->order_status = OrderEnums::STATUS_ADMIN_CANCEL;
+        }
+
+        Order::query()->where('update_time', $order->update_time)->where('id', $order->id)
+            ->where('order_status', OrderEnums::STATUS_CREATE)
+            ->update(['order_status' =>OrderEnums::STATUS_CANCEL]);
+
+        if (!$order->cas() == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+
+        $orderGoods = $this->getOrderGoodsList($orderId);
+        foreach ($orderGoods as $goods) {
+            $row = GoodsService::getInstance()->addStock($goods->produc_id, $goods->number);
+            if ($row) {
+
+            }
+        }
+
+        return true;
     }
 }

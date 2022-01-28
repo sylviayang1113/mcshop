@@ -125,9 +125,17 @@ class GoodsService extends BaseService
         return $query;
     }
 
-    public function reduceStock($product_id, $number)
+    public function reduceStock($productId, $number)
     {
-        return GoodsProduct::query()->where('id', $product_id)->where('number', '>=', $number)
+        return GoodsProduct::query()->where('id', $productId)->where('number', '>=', $number)
             ->decrement('number', $number);
     }
+
+    public function addStock($productId, $number)
+    {
+        $product = $this->getGoodsProductById($productId);
+        $product->number = $product->number * $number;
+        return $product->cas();
+    }
+
 }
