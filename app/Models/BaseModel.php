@@ -88,7 +88,35 @@ class BaseModel extends Model
             $query->where($key, $this->getOriginal($key));
         }
 
-        return $query->udpate($dirty);
+        $row = $query->udpate($dirty);
+        if ($row > 0) {
+
+            $this->syncChanges();
+            $this->fireModelEvent('cased', false);
+            $this->syncOriginal();
+        }
+        return $row;
     }
 
+    /**
+     * Register a casing model event with the dispatcher.
+     *
+     * @param  \Closure|string  $callback
+     * @return void
+     */
+    public static function casing($callback)
+    {
+        static::registerModelEvent('casing', $callback);
+    }
+
+    /**
+     * Register a cased model event with the dispatcher.
+     *
+     * @param  \Closure|string  $callback
+     * @return void
+     */
+    public static function cased($callback)
+    {
+        static::registerModelEvent('cased', $callback);
+    }
 }

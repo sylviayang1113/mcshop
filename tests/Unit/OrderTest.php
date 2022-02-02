@@ -139,6 +139,7 @@ class OrderTest extends TestCase
         $user = User::first(['id', 'nickname', 'mobile', 'update_time']);
         $user->nickname = 'test';
         $user->mobile = '15000000000';
+        User::whereId($user->id)->update(['mobile' => '15000000000']);
         $ret = $user->cas();
     }
 }

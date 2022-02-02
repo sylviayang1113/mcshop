@@ -84,10 +84,21 @@ class User extends BaseModel implements
 
     public function getJWTCustomClaims()
     {
-        // TODO: Implement getJWTCustomClaims() method.
         return [
             'iss' => env('JWT_ISSUER'),
             'userId' => $this->getKey()
         ];
+    }
+
+    protected static function booted()
+    {
+        static::casing(function($user) {
+            echo 'casing'.PHP_EOL;
+            return false;
+        });
+        static::cased(function($user) {
+            echo 'cased'.PHP_EOL;
+            return false;
+        });
     }
 }
