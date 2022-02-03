@@ -39,8 +39,19 @@ class BaseService
         throw new BusinessException($codeResponce, $info);
     }
 
+    /**
+     * @throws BusinessException
+     */
     public function throwBadArgumentValue()
     {
         $this->throwBusinessException(CodeResponse::PARAM_VALUE_ILLEGAL);
+    }
+
+    /**
+     * @throws BusinessException
+     */
+    public function throwUpdateFail()
+    {
+        $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
     }
 }

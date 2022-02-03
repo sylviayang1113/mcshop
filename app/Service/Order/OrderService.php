@@ -294,4 +294,25 @@ class OrderService extends BaseService
         $user = UserService::getInstance()->getUserById($order->user_id);
         $user->notify(new NewPaidOrderSMSNotify());
     }
+
+    public function ship($userId, $orderId, $shipSn, $shipChannel)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+
+        if (!$order->canShipHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能发货');
+        }
+        $order->order_status = OrderEnums::STATUS_SHIP;
+        $order->ship_sn = $shipSn;
+        $order->ship_channel = $shipChannel;
+        $order->ship_time = now()->toDateTimeString();
+        if ($order->cas() == 0) {
+            $this->throwUpdateFail();
+        }
+        
+        return $order;
+    }
 }

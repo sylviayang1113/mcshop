@@ -17,4 +17,9 @@ trait OrderStatusTrait
     {
         return $this->order_status == OrderEnums::STATUS_CREATE;
     }
+
+    public function canShipHandle()
+    {
+        return $this->order_status == OrderEnums::STATUS_PAY;
+    }
 }
