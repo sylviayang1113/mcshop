@@ -267,14 +267,7 @@ class OrderService extends BaseService
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
         }
 
-        $orderGoods = $this->getOrderGoodsList($orderId);
-        foreach ($orderGoods as $goods) {
-            $row = GoodsService::getInstance()->addStock($goods->produc_id, $goods->number);
-            if ($row) {
-
-            }
-        }
-
+        $this->returnStock($orderId);
         return true;
     }
 
@@ -332,6 +325,36 @@ class OrderService extends BaseService
         }
 
         return $order;
+    }
+
+    public function agreeRefund(Order $order, $refundType, $refundContent)
+    {
+        if (!$order->canAgreeRefundHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能同意退款');
+        }
+        $now = now()->toDateTimeString();
+        $order->order_status = OrderEnums::STATUS_AUTO_CONFIRM;
+        $order->end_time = $now;
+        $order->refund_amount = $order->actual_price;
+        $order->refund_type = $refundType;
+        $order->refund_content = $refundContent;
+        $order->refund_time = $now;
+        if ($order->cas() == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+        $this->returnStock($order->id);
+        return $order;
+    }
+
+    public function returnStock($orderId)
+    {
+        $orderGoods = $this->getOrderGoodsList($orderId);
+        foreach ($orderGoods as $goods) {
+            $row = GoodsService::getInstance()->addStock($goods->produc_id, $goods->number);
+            if ($row) {
+                $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+            }
+        }
     }
 
 }
