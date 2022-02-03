@@ -312,7 +312,26 @@ class OrderService extends BaseService
         if ($order->cas() == 0) {
             $this->throwUpdateFail();
         }
-        
+
         return $order;
     }
+
+    public function refund($userId, $orderId)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+
+        if (!$order->canRefundHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能申请退款');
+        }
+        $order->order_status = OrderEnums::STATUS_REFUND;
+        if ($order->cas() == 0) {
+            $this->throwUpdateFail();
+        }
+
+        return $order;
+    }
+
 }

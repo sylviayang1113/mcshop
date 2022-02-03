@@ -22,4 +22,9 @@ trait OrderStatusTrait
     {
         return $this->order_status == OrderEnums::STATUS_PAY;
     }
+
+    public function canRefundHandle()
+    {
+        return $this->order_status == OrderEnums::STATUS_PAY;
+    }
 }
