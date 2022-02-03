@@ -136,10 +136,23 @@ class OrderTest extends TestCase
 
     public function testCas()
     {
-        $user = User::first(['id', 'nickname', 'mobile', 'update_time']);
-        $user->nickname = 'test';
+        $user = $this->user->refresh();
+        $user->nickname = 'test1';
         $user->mobile = '15000000000';
-        User::whereId($user->id)->update(['mobile' => '15000000000']);
-        $ret = $user->cas();
+        $is = $user->cas();
+        $this->assertEquals(1, $is);
+        $this->assertEquals('test1', User::find($this->user->id)->nickname);
+        User::query()->where('id', $this->user->id)->update(['nickname' => 'test2']);
+        $is = $user->cas();
+        $this->assertEquals(0, $is);
+        $this->assertEquals('test2', User::find($this->user->id)->nickname);
+        $user->save();
+    }
+
+    public function testPayOrder()
+    {
+        $order = $this->getOrder()->refresh();
+        OrderService::getInstance()->payOrder($order, 'payid_test');
+
     }
 }

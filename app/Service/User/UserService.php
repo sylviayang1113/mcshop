@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Notification;
 
 class UserService extends BaseService
 {
+    public function getUserById($id)
+    {
+        return User::find($id);
+    }
+
     public function getUsers(array $userIds)
     {
         if (empty($userId)) {

@@ -12,12 +12,16 @@ use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Order\Order;
 use App\Models\Order\OrderGoods;
+use App\Notifications\NewPaidOrderEmailNotify;
+use App\Notifications\NewPaidOrderSMSNotify;
 use App\Service\BaseService;
 use App\Service\Goods\GoodsService;
 use App\Service\Promotion\CouponService;
 use App\Service\Promotion\GrouponService;
 use App\Service\SystemService;
+use App\Service\User\UserService;
 use App\Services\User\AddressService;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -272,5 +276,22 @@ class OrderService extends BaseService
         }
 
         return true;
+    }
+
+    public function payOrder(Order $order, $payId)
+    {
+        if (!$order->canPayHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_PAY_FAIL, '订单不能支付');
+        }
+        $order->pay_id = $payId;
+        $order->pay_time = now()->toDateTimeString();
+        $order->order_status = OrderEnums::STATUS_PAY;
+        if ($order->cas()) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+        GrouponService::getInstance()->payGrouponOrder($order->id);
+        Notification::route('mail', '')->notify(new NewPaidOrderEmailNotify($order->id));
+        $user = UserService::getInstance()->getUserById($order->user_id);
+        $user->notify(new NewPaidOrderSMSNotify());
     }
 }

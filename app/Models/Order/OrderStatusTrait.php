@@ -12,4 +12,9 @@ trait OrderStatusTrait
     {
         return $this->order_status == OrderEnums::STATUS_CREATE;
     }
+
+    public function canPayHandle()
+    {
+        return $this->order_status == OrderEnums::STATUS_CREATE;
+    }
 }

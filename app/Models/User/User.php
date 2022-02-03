@@ -101,4 +101,9 @@ class User extends BaseModel implements
             return false;
         });
     }
+
+    public function routeNotificationForEasySms($driver, $notification = null)
+    {
+        return $this->mobile;
+    }
 }
