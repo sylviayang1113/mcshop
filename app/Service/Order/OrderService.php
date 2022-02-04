@@ -357,4 +357,40 @@ class OrderService extends BaseService
         }
     }
 
+    /**
+     * 获取订单的商品数量
+     * @param $orderId
+     * @return int
+     */
+    public function countOrderGoods($orderId)
+    {
+        return OrderGoods::whereOrderId($orderId)->count(['id']);
+    }
+
+    /**
+     * 确认收货
+     * @param $userId
+     * @param $orderId
+     * @param  bool  $isAuto
+     * @return Order
+     * @throws BusinessException
+     * @throws Throwable
+     */
+    public function confirm($userId, $orderId,$isAuto = false)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+        if (!$order->canConfirmHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能确认收货');
+        }
+        $order->comments = $this->countOrderGoods($orderId);
+        $order->order_status = $isAuto ? OrderEnums::STATUS_AUTO_CONFIRM : OrderEnums::STATUS_CONFIRM;
+        $order->confirm_time = now()->toDateTimeString();
+        if ($order->cas() == 0) {
+            $this->throwUpdateFail();
+        }
+        return $order;
+    }
 }

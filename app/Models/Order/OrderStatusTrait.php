@@ -32,4 +32,9 @@ trait OrderStatusTrait
     {
         return $this->order_status == OrderEnums::STATUS_PAY;
     }
+
+    public function canConfirmHandle()
+    {
+        return $this->order_status == OrderEnums::STATUS_SHIP;
+    }
 }
