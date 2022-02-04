@@ -4,8 +4,10 @@
 namespace Tests\Unit;
 
 
+use App\Enums\OrderEnums;
 use App\Inputs\OrderSubmitInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
+use App\Models\Order\Order;
 use App\Models\Order\OrderGoods;
 use App\Models\User\User;
 use App\Service\Goods\GoodsService;
@@ -149,10 +151,26 @@ class OrderTest extends TestCase
         $user->save();
     }
 
-    public function testPayOrder()
+    public function testBaseProcess()
     {
         $order = $this->getOrder()->refresh();
         OrderService::getInstance()->payOrder($order, 'payid_test');
+        $this->assetEquals(OrderEnums::STATUS_PAY, $order->refresh()->order_status);
+        $this->assertEquals('payid_test', $order->pay_id);
 
+        $shipSn = '1234567';
+        $shipChannel = 'shunfeng';
+        OrderService::getInstance()->ship($this->userId, $order->id, $shipSn, $shipChannel);
+        $order->refresh();
+        $this->assertEquals(OrderEnums::STATUS_SHIP, $order->order_status);
+        $this->assertEquals($shipSn, $order->ship_sn);
+        $this->assertEquals($shipChannel, $order->shipChannel);
+
+        OrderService::getInstance()->confirm($this->user->id, $order->id);
+        $order->refresh();
+        $this->assertEquals(OrderEnums::STATUS_CONFIRM, $order->order_status);
+
+        OrderService::getInstance()->delete($this->user->id, $order->id);
+        $this->assertNull(Order::find($order->id));
     }
 }
