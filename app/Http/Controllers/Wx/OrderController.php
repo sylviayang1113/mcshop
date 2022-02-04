@@ -51,4 +51,35 @@ class OrderController extends WxController
         OrderService::getInstance()->userCancel($this->userId(), $orderId);
         return $this->success();
     }
+
+    /**
+     * 申请退款
+     * @return JsonResponse
+     * @throws BusinessException
+     */
+    public function refund()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->refund($this->userId(), $orderId);
+        return $this->success();
+    }
+
+    /**
+     * 确认收货
+     * @return JsonResponse
+     * @throws BusinessException
+     */
+    public function confirm()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->confirm($this->userId(), $orderId);
+        return $this->success();
+    }
+
+    public function delete()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->delete($this->userId(), $orderId);
+        return $this->success();
+    }
 }

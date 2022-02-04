@@ -393,4 +393,17 @@ class OrderService extends BaseService
         }
         return $order;
     }
+
+    public function delete($userId, $orderId)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+        if (!$order->canDeleteHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能删除');
+        }
+        $order->delete();
+        // TODO 删除售后
+    }
 }
