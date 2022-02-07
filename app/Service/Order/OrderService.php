@@ -21,6 +21,7 @@ use App\Service\Promotion\GrouponService;
 use App\Service\SystemService;
 use App\Service\User\UserService;
 use App\Services\User\AddressService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
@@ -405,5 +406,30 @@ class OrderService extends BaseService
         }
         $order->delete();
         // TODO 删除售后
+    }
+
+    public function getTimeoutUnconfirmOrders()
+    {
+        $days = SystemService::getInstance()->getOrderUnconfirmDays();
+        return Order::query()->where('order_status', OrderEnums::STATUS_SHIP)
+            ->where('ship_time', '<=', now()->subDays($days))
+            ->where('ship_time', '>=', now()->subDays($days + 30))
+            ->get();
+    }
+
+    public function autoConfirm()
+    {
+        Log::info('Auto confirm start');
+        $orders = $this->getTimeoutUnconfirmOrders();
+        foreach ($orders as $order) {
+            try {
+                $this->confirm($order->user_id, $order->id, true);
+            } catch (BusinessException $e) {
+
+            } catch (Throwable $e) {
+                Log::info('Auto confirm error.Error'.$e->getMessage());
+            }
+
+        }
     }
 }

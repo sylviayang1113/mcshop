@@ -31,6 +31,11 @@ class SystemService extends BaseService
     const LITEMALL_MALL_LONGITUDE = "litemall_mall_longitude";
     const LITEMALL_MALL_Latitude = "litemall_mall_latitude";
 
+    public function getOrderUnconfirmDays()
+    {
+        return (int) $this->get(self::LITEMALL_ORDER_UNCONFIRM);
+    }
+
     public function getOrderUnpaidDelayMinutes()
     {
         return (int) $this->get(self::LITEMALL_ORDER_UNPAID);
