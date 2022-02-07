@@ -173,4 +173,26 @@ class OrderTest extends TestCase
         OrderService::getInstance()->delete($this->user->id, $order->id);
         $this->assertNull(Order::find($order->id));
     }
+
+    public function testRefundProcess()
+    {
+        $order = $this->getOrder()->refresh();
+        OrderService::getInstance()->payOrder($order, 'payid_test');
+        $this->assetEquals(OrderEnums::STATUS_PAY, $order->refresh()->order_status);
+        $this->assertEquals('payid_test', $order->pay_id);
+
+        OrderService::getInstance()->refund($this->user->id, $order->id);
+        $order->refresh();
+        $this->assertEquals(OrderEnums::STATUS_REFUND, $order->order_status);
+
+        OrderService::getInstance()->agreeRefund($order->refresh(), '微信退款接口', '1234567');
+        $order->refresh();
+        $this->assertEquals(OrderEnums::STATUS_REFUND_CONFIRM, $order->order_status);
+        $this->assertEquals('微信退款接口', $order->refund_type);
+        $this->assertEquals('1234567', $order->refundT_content);
+
+        OrderService::getInstance()->delete();
+        OrderService::getInstance()->delete($this->user->id, $order->id);
+        $this->assertNull(Order::find($order->id));
+    }
 }
