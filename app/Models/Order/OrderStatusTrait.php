@@ -88,4 +88,10 @@ trait OrderStatusTrait
             'aftersale' => $this->canAfterSaleHandle()
         ];
     }
+
+    public function isShipStatus()
+    {
+        return $this->order_status == OrderEnums::STATUS_SHIP;
+    }
+
 }
