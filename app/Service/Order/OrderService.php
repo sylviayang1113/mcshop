@@ -10,6 +10,7 @@ use App\Exceptions\BusinessException;
 use App\Inputs\OrderSubmitInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Goods\GoodsProduct;
+use App\Models\Order\ExpressService;
 use App\Models\Order\Order;
 use App\Models\Order\OrderGoods;
 use App\Notifications\NewPaidOrderEmailNotify;
@@ -21,6 +22,7 @@ use App\Service\Promotion\GrouponService;
 use App\Service\SystemService;
 use App\Service\User\UserService;
 use App\Services\User\AddressService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -431,5 +433,42 @@ class OrderService extends BaseService
             }
 
         }
+    }
+
+    public function detail($userId, $orderId)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+
+        $detail = Arr::only($order->toArray(), [
+            "id",
+            "orderSn",
+            "message",
+            "addTime",
+            "consignee",
+            "mobile",
+            "address",
+            "goodsPrice",
+            "couponPrice",
+            "freightPrice",
+            "actualPrice",
+            "aftersaleStatus",
+        ]);
+
+        $detail['orderStatusText'] = OrderEnums::STATUS_TEXT_MAP[$order->order_status] ?? '';
+        $detail['handleOption'] = $order->getCanHandleOptions();
+        $detail['expCode'] = $order->ship_channle;
+        $detail['expNo'] = $order->ship_sh;
+        $detail['expName'] = ExpressService::getInstance()->getExpressName($order->shop_channel);
+
+        $goodsList = $this->getOrderGoodsList($orderId);
+        $express = []; // TODO
+        return [
+            'orderInfo' => $detail,
+            'orderGoods' => $goodsList,
+            'expressInfo' => $express
+        ];
     }
 }

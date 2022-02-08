@@ -5,6 +5,7 @@ namespace App\Models\Order;
 
 
 use App\Enums\OrderEnums;
+use function Symfony\Component\Translation\t;
 
 trait OrderStatusTrait
 {
@@ -48,5 +49,43 @@ trait OrderStatusTrait
             OrderEnums::STATUS_CONFIRM,
             OrderEnums::STATUS_AUTO_CONFIRM
         ]);
+    }
+
+    public function canCommentHandle()
+    {
+        return in_array($this->order_status, [
+           OrderEnums::STATUS_CONFIRM,
+           OrderEnums::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    public function canRebuyHandle()
+    {
+        return in_array($this->order_status, [
+            OrderEnums::STATUS_CONFIRM,
+            OrderEnums::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    public function canAfterSaleHandle()
+    {
+        return in_array($this->order_status, [
+            OrderEnums::STATUS_CONFIRM,
+            OrderEnums::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    public function getCanHandleOption()
+    {
+        return [
+            'cancel' => $this->canCancelHandle(),
+            'delete' => $this->canDeleteHandle(),
+            'pay' => $this->canPayHandle(),
+            'comment' => $this->canCommentHandle(),
+            'confirm' => $this->canConfirmHandle(),
+            'refund' => $this->canRefundHandle(),
+            'rebuy' => $this->canRebuyHandle(),
+            'aftersale' => $this->canAfterSaleHandle()
+        ];
     }
 }

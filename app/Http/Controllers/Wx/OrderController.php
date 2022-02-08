@@ -82,4 +82,11 @@ class OrderController extends WxController
         OrderService::getInstance()->delete($this->userId(), $orderId);
         return $this->success();
     }
+
+    public function detail()
+    {
+        $orderId = $this->verifyId('orderId');
+        $detail = OrderService::getInstance()->detail($this->userId, $orderId);
+        return $this->success($detail);
+    }
 }
