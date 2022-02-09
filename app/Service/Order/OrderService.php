@@ -466,7 +466,7 @@ class OrderService extends BaseService
             $detail['expCode'] = $order->ship_channle;
             $detail['expNo'] = $order->ship_sh;
             $detail['expName'] = ExpressService::getInstance()->getExpressName($order->shop_channel);
-            $express = []; // TODO
+            $express = ExpressService::getInstance()->getOrderTraces($order->ship_channel, $order->ship_sn);
         }
 
         return [
