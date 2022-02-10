@@ -195,4 +195,17 @@ class OrderTest extends TestCase
         OrderService::getInstance()->delete($this->user->id, $order->id);
         $this->assertNull(Order::find($order->id));
     }
+
+    public function testOrderStatusTrait()
+    {
+        $order = $this->getOrder();
+        $this->assertEquals(true, $order->isCreateStatus());
+        $this->assertEquals(false, $order->isCancelStatus());
+        $this->assertEquals(false, $order->isPayStatus());
+
+        $this->assertEquals(true, $order->canCancelHandle());
+        $this->assertEquals(true, $order->canPayHandle());
+        $this->assertEquals(false, $order->canDeleteHandle());
+        $this->assertEquals(false, $order->canConfirmHandle());
+    }
 }

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 
 
 use App\Models\Order\ExpressService;
+use App\Models\Order\Order;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

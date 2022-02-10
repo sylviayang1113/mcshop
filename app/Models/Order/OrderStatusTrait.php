@@ -5,77 +5,103 @@ namespace App\Models\Order;
 
 
 use App\Enums\OrderEnums;
-use function Symfony\Component\Translation\t;
+use Illuminate\Support\Str;
 
+
+/**
+ * Trait OrderStatusTrait
+ * @package App\Models\Order
+ * @method bool canCancelHandle()
+ * @method bool canDeleteHandle()
+ * @method bool canPayHandle()
+ * @method bool canCommentHandle()
+ * @method bool canConfirmHandle()
+ * @method bool canRefundHandle()
+ * @method bool canRebuyHandle()
+ * @method bool canAftersaleHandle()
+ * @method bool isCreateStatus()
+ * @method bool isPayStatus()
+ * @method bool isShipStatus()
+ * @method bool isConfirmStatus()
+ * @method bool isCancelStatus()
+ * @method bool isAutoCancelStatus()
+ * @method bool isRefundStatus()
+ * @method bool isRefundConfirmStatus()
+ * @method bool isAutoConfirmStatus()
+ */
 trait OrderStatusTrait
 {
-    public function canCancelHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_CREATE;
-    }
 
-    public function canPayHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_CREATE;
-    }
-
-    public function canShipHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_PAY;
-    }
-
-    public function canRefundHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_PAY;
-    }
-
-    public function canAgreeRefundHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_PAY;
-    }
-
-    public function canConfirmHandle()
-    {
-        return $this->order_status == OrderEnums::STATUS_SHIP;
-    }
-
-    public function canDeleteHandle()
-    {
-        return in_array($this->order_status, [
+    private $canHandleMap = [
+        // 取消操作
+        'cancel' => [
+            OrderEnums::STATUS_CREATE
+        ],
+        // 删除操作
+        'delete' => [
             OrderEnums::STATUS_CANCEL,
             OrderEnums::STATUS_AUTO_CANCEL,
             OrderEnums::STATUS_ADMIN_CANCEL,
             OrderEnums::STATUS_REFUND_CONFIRM,
             OrderEnums::STATUS_CONFIRM,
             OrderEnums::STATUS_AUTO_CONFIRM
-        ]);
-    }
-
-    public function canCommentHandle()
-    {
-        return in_array($this->order_status, [
-           OrderEnums::STATUS_CONFIRM,
-           OrderEnums::STATUS_AUTO_CONFIRM
-        ]);
-    }
-
-    public function canRebuyHandle()
-    {
-        return in_array($this->order_status, [
+        ],
+        // 支付操作
+        'pay' => [
+            OrderEnums::STATUS_CREATE
+        ],
+        // 发货
+        'ship' => [
+            OrderEnums::STATUS_PAY
+        ],
+        // 评论操作
+        'comment' => [
             OrderEnums::STATUS_CONFIRM,
             OrderEnums::STATUS_AUTO_CONFIRM
-        ]);
-    }
-
-    public function canAfterSaleHandle()
-    {
-        return in_array($this->order_status, [
+        ],
+        // 确认收货操作
+        'confirm' => [OrderEnums::STATUS_SHIP],
+        // 取消订单并退款操作
+        'refund' => [OrderEnums::STATUS_PAY],
+        // 再次购买
+        'rebuy' => [
             OrderEnums::STATUS_CONFIRM,
             OrderEnums::STATUS_AUTO_CONFIRM
-        ]);
+        ],
+        // 售后操作
+        'aftersale' => [
+            OrderEnums::STATUS_CONFIRM,
+            OrderEnums::STATUS_AUTO_CONFIRM
+        ],
+        // 同意退款
+        'agreerefund' => [
+            OrderEnums::STATUS_REFUND
+        ],
+    ];
+
+    public function _call($name, $arguments)
+    {
+        if (Str::is('can*Handle', $name)) {
+            if (is_null($this->order_status)) {
+                throw new Exception("order status is null when call method[$name]!");
+            }
+            $key = Str::of($name)->replaceFirst('can', '')
+                ->replaceLast('Handle', '')
+                ->lower();
+            return in_array($this->order_status, $this->canHandleMap[(string) $key]);
+        } elseif (Str::is('is*Status', $name)) {
+            if (is_null($this->order_status)) {
+                throw new Exception("order status is null when call method[$name]!");
+            }
+            $key = Str::of($name)->replaceFirst('is', '')
+                ->replaceLast('Status', '')->snake()->upper()->prepend('STATUS_');
+            $status = (new ReflectionClass(OrderEnums::class))->getConstant($key);
+            return $this->order_status == $status;
+        }
+        return parent::__call($name, $arguments);
     }
 
-    public function getCanHandleOption()
+    public function getCanHandelOptions()
     {
         return [
             'cancel' => $this->canCancelHandle(),
@@ -85,13 +111,7 @@ trait OrderStatusTrait
             'confirm' => $this->canConfirmHandle(),
             'refund' => $this->canRefundHandle(),
             'rebuy' => $this->canRebuyHandle(),
-            'aftersale' => $this->canAfterSaleHandle()
+            'aftersale' => $this->canAfterSaleHandle(),
         ];
     }
-
-    public function isShipStatus()
-    {
-        return $this->order_status == OrderEnums::STATUS_SHIP;
-    }
-
 }
