@@ -7,14 +7,19 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Inputs\OrderSubmitInput;
+use App\Models\Order\Order;
 use App\Service\Order\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
+use Yansongda\Pay\Pay;
 
 class OrderController extends WxController
 {
+
+    protected $except = ['wxNotify'];
     /**
      * 提交订单
      * @return JsonResponse
@@ -88,5 +93,25 @@ class OrderController extends WxController
         $orderId = $this->verifyId('orderId');
         $detail = OrderService::getInstance()->detail($this->userId, $orderId);
         return $this->success($detail);
+    }
+
+    public function h5pay()
+    {
+        $orderId = $this->verifyId('oderId');
+        $order = OrderService::getInstance()->getWxPayOrder($this->userId(), $orderId);
+        return Pay::wechat()->wap($order);
+    }
+
+    public function wxNotify()
+    {
+        $data = Pay::wechat()->verify();
+        $data = $data->toArray();
+
+        Log::info('wxNotify', $data);
+        DB::transaction(function () use ($data) {
+            OrderService::getInstance()->WxNotify();
+        });
+        return Pay::wechat()->success();
+
     }
 }

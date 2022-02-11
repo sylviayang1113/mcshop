@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
+use Yansongda\Pay\Pay;
 
 class OrderService extends BaseService
 {
@@ -289,6 +290,7 @@ class OrderService extends BaseService
         Notification::route('mail', '')->notify(new NewPaidOrderEmailNotify($order->id));
         $user = UserService::getInstance()->getUserById($order->user_id);
         $user->notify(new NewPaidOrderSMSNotify());
+        return $order;
     }
 
     public function ship($userId, $orderId, $shipSn, $shipChannel)
@@ -474,5 +476,50 @@ class OrderService extends BaseService
             'orderGoods' => $goodsList,
             'expressInfo' => $express
         ];
+    }
+
+    public function getWxPayOrder($userId, $orderId)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBadArgumentValue();
+        }
+        if (!$order->canPayHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_PAY_FAIL, "订单支付失败");
+        }
+
+        return [
+            'out_trade_no' => time(),
+            'body' => 'subject-测试',
+            'total_fee' => 1,
+            'total_fee' => bcmul($order->actual_price, 100)
+        ];
+        return Pay::wechat()->wap($order);
+    }
+    public function getOrderBySn($orderSn)
+    {
+        return Order::query()->where('order_sn', $orderSn)->first();
+    }
+
+    public function wxNotify(array $data)
+    {
+        $orderSn = $data['out_trade_no'] ?? '';
+        $payId = $data['transaction_id'] ?? '';
+        $price = bcdiv($data['total_fee'], 100, 2);
+
+        $order = $this->getOrderBySn($orderSn);
+        if (is_null($order)) {
+            $this->throwBusinessException(CodeResponse::ORDER_UNKNOWN);
+        }
+
+        if ($order->isHadPaid()) {
+            return $order;
+        }
+
+        if (bccomp($order->actual_price, $price, 2) != 0) {
+            $this->throwBusinessException(CodeResponse::FAIL, '支付回调');
+        }
+
+        $this->payOrder($order, $payId);
     }
 }
