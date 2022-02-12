@@ -2,7 +2,10 @@
 
 namespace Tests;
 
+use App\Inputs\OrderSubmitInput;
+use App\Models\Order\Order;
 use App\Models\User\User;
+use App\Service\Order\OrderService;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -74,6 +77,33 @@ abstract class TestCase extends BaseTestCase
         }
 
         $this->assertEquals($content2, $content1);
+    }
+
+    public function getSimpleOrder($options = [[11.3, 2], [2.3, 1], [81.4, 4]])
+    {
+        $this->user = User::factory()->AddressDefault()->create();
+        $this->auth();
+        $address = AddressServices::getInstance()->getDefaultAddress($this->user->id);
+
+        foreach ($options as list($price, $num)) {
+            /** @var GoodsProduct $product1 */
+            $product = GoodsProduct::factory()->create(['price' => $price]);
+            CartServices::getInstance()->add($this->user->id, $product->goods_id, $product1->id, $num);
+        }
+
+        $input = OrderSubmitInput::new([
+            'addressId' => $address->id,
+            'cartId' => 0,
+            'couponId' => 0,
+            'grouponRulesId' => 0,
+            'message' => '备注'
+        ]);
+
+        $order = OrderService::getInstance()->submit($this->user->id, $input);
+        $order->actual_price = $order->actual_price - $order->freight_price;
+        $order->save();
+        return OrderService::getInstance()->submit($this->user->id, $input);
+
     }
 
 }
